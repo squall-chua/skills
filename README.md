@@ -9,27 +9,30 @@ This repository contains the `system-design-architect` skill, an automated frame
 ## 🚀 Core Philosophy
 
 ### 1. Zero Blind Assumptions
+
 The agent will **never** unilaterally decide on an architecture. At every critical juncture, it proposes 2-3 viable options with their respective trade-offs (Pros/Cons) and waits for your selection.
 
 ### 2. Interactive Step-by-Step Workflow
+
 The process is broken down into 7 distinct phases. The agent completes one phase, presents the findings/options, and halts for your input before moving to the next.
 
 ### 3. Progressive Documentation
+
 Throughout the session, the agent maintains the state of the design. Only when all 7 steps are finalized is the complete, polished Markdown document generated and saved to your desired location.
 
 ---
 
 ## 🗺️ The 7-Step Roadmap
 
-Following the "Ace System Design Interviews Like a Boss" framework:
+Following the ["Ace System Design Interviews Like a Boss"](https://bytebytego.com/guides/how-to-ace-system-design-interviews-like-a-boss/) framework:
 
-1.  **Requirements Clarification**: Define Functional and Non-Functional requirements (Scale, Latency, Consistency).
-2.  **Capacity Estimation**: Calculate expected Users, Traffic (RPS), Storage, Memory, and Bandwidth needs.
-3.  **Interface Design**: Define API protocols (REST, gRPC) and public/internal endpoints.
-4.  **High-Level Design (HLD)**: Map out the architecture using **Mermaid.js** diagrams (Load Balancers, CDNs, App Servers, etc.).
-5.  **Database Design**: Choose the right storage engine (SQL vs. NoSQL) and define the data schema.
-6.  **Scalability & Performance**: Implement caching strategies, sharding, and optimization layers.
-7.  **Reliability & Resiliency**: Identify Single Points of Failure (SPOF) and design failover/redundancy mechanisms.
+1. **Requirements Clarification**: Define Functional and Non-Functional requirements (Scale, Latency, Consistency).
+2. **Capacity Estimation**: Calculate expected Users, Traffic (RPS), Storage, Memory, and Bandwidth needs.
+3. **Interface Design**: Define API protocols (REST, gRPC) and public/internal endpoints.
+4. **High-Level Design (HLD)**: Map out the architecture using **Mermaid.js** diagrams (Load Balancers, CDNs, App Servers, etc.).
+5. **Database Design**: Choose the right storage engine (SQL vs. NoSQL) and define the data schema.
+6. **Scalability & Performance**: Implement caching strategies, sharding, and optimization layers.
+7. **Reliability & Resiliency**: Identify Single Points of Failure (SPOF) and design failover/redundancy mechanisms.
 
 ---
 
@@ -42,6 +45,7 @@ To activate the skill within an Antigravity session, simply mention system desig
 - *"Let's build an architecture document for a video streaming service."*
 
 ### Trigger Keywords
+
 The skill is automatically loaded when it detects:
 `design system`, `architecture document`, `system design`
 
@@ -50,6 +54,7 @@ The skill is automatically loaded when it detects:
 ## 📊 Example Output
 
 Check out [docs/design/url-shortener.md](docs/design/url-shortener.md) for a real-world example of a document generated using this skill. It includes:
+
 - Precise capacity calculations.
 - Sharded database justifications.
 - Mermaid.js architecture diagrams.
@@ -70,4 +75,5 @@ Ensure your `ARCHITECTURE.md` or `GEMINI.md` reflects the availability of this n
 ---
 
 ## 📄 License
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
