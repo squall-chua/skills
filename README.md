@@ -1,79 +1,62 @@
-# System Design Architect Skill 🏗️
+# Agent Skills 🧩
 
-> A powerful, interactive agent skill designed to guide you through a comprehensive 7-step system design roadmap.
+> My personal collection of customized **agent skills** — capabilities I've built and tailored for skill-aware AI coding agents to load on demand.
 
-This repository contains the `system-design-architect` skill, an automated framework that helps engineers and architects build robust, scalable, and resilient system design documentation. Unlike generic AI generation, this skill prioritizes **Socratic dialogue** and **collaborative decision-making**.
-
----
-
-## 🚀 Core Philosophy
-
-### 1. Zero Blind Assumptions
-
-The agent will **never** unilaterally decide on an architecture. At every critical juncture, it proposes 2-3 viable options with their respective trade-offs (Pros/Cons) and waits for your selection.
-
-### 2. Interactive Step-by-Step Workflow
-
-The process is broken down into 7 distinct phases. The agent completes one phase, presents the findings/options, and halts for your input before moving to the next.
-
-### 3. Progressive Documentation
-
-Throughout the session, the agent maintains the state of the design. Only when all 7 steps are finalized is the complete, polished Markdown document generated and saved to your desired location.
+This repo is where I keep the agent skills I use in my own workflow. Each skill teaches an agent how to handle one kind of task end to end, and is self-contained and conditionally loaded — so an agent pulls in a capability only when the work calls for it.
 
 ---
 
-## 🗺️ The 7-Step Roadmap
+## 🗂️ Available skills
 
-Following the ["Ace System Design Interviews Like a Boss"](https://bytebytego.com/guides/how-to-ace-system-design-interviews-like-a-boss/) framework:
+### 🏗️ [`system-design-architect`](skills/system-design-architect/SKILL.md)
 
-1. **Requirements Clarification**: Define Functional and Non-Functional requirements (Scale, Latency, Consistency).
-2. **Capacity Estimation**: Calculate expected Users, Traffic (RPS), Storage, Memory, and Bandwidth needs.
-3. **Interface Design**: Define API protocols (REST, gRPC) and public/internal endpoints.
-4. **High-Level Design (HLD)**: Map out the architecture using **Mermaid.js** diagrams (Load Balancers, CDNs, App Servers, etc.).
-5. **Database Design**: Choose the right storage engine (SQL vs. NoSQL) and define the data schema.
-6. **Scalability & Performance**: Implement caching strategies, sharding, and optimization layers.
-7. **Reliability & Resiliency**: Identify Single Points of Failure (SPOF) and design failover/redundancy mechanisms.
+Guides you through producing a comprehensive system design document using an interactive, Socratic 7-step roadmap. Instead of making blind architectural assumptions, the agent proposes 2–3 viable options with trade-offs at each decision point and waits for you to choose — then compiles the final Markdown document (with Mermaid.js diagrams) once every step is settled.
+
+**Use it when you want to:**
+
+- Design a scalable, resilient system from scratch (e.g. a URL shortener, real-time chat, video streaming).
+- Produce architecture documentation with capacity estimates, API design, data model, and failover strategy.
+- Prepare for or practice a system design interview with a structured, decision-driven walkthrough.
+
+**What it covers — the 7-step roadmap:**
+
+1. **Requirements Clarification** — functional and non-functional requirements (scale, latency, consistency).
+2. **Capacity Estimation** — users, traffic (RPS), storage, memory, and bandwidth.
+3. **Interface Design** — API protocols (REST, gRPC) and public/internal endpoints.
+4. **High-Level Design** — architecture mapped with Mermaid.js diagrams (load balancers, CDNs, app servers).
+5. **Database Design** — SQL vs. NoSQL choice and the data schema.
+6. **Scalability & Performance** — caching, sharding, and optimization layers.
+7. **Reliability & Resiliency** — single points of failure and failover/redundancy design.
+
+*More skills will be added over time.*
 
 ---
 
-## 🛠️ Usage
+## 🛠️ Installation & usage
 
-To activate the skill within an Antigravity session, simply mention system design or request an architecture document:
+Skills are harness-agnostic. To use one, copy its directory into wherever your agent loads skills from — for example:
+
+```bash
+# Claude Code (user-level)
+cp -r skills/system-design-architect ~/.claude/skills/
+
+# or project-level
+cp -r skills/system-design-architect .claude/skills/
+```
+
+Once installed, trigger a skill with natural language that matches its purpose — e.g.:
 
 - *"I want to design a high-scale URL shortener."*
 - *"Help me create a system design for a real-time chat application."*
-- *"Let's build an architecture document for a video streaming service."*
-
-### Trigger Keywords
-
-The skill is automatically loaded when it detects:
-`design system`, `architecture document`, `system design`
 
 ---
 
-## 📊 Example Output
+## 📊 Example output
 
-Check out [docs/design/url-shortener.md](docs/design/url-shortener.md) for a real-world example of a document generated using this skill. It includes:
-
-- Precise capacity calculations.
-- Sharded database justifications.
-- Mermaid.js architecture diagrams.
-- Global edge redirection strategies.
-
----
-
-## 📦 Installation
-
-To use this skill in your project, copy the `skills/system-design-architect` directory into your `.agent/skills/` folder.
-
-```bash
-cp -r skills/system-design-architect .agent/skills/
-```
-
-Ensure your `ARCHITECTURE.md` or `GEMINI.md` reflects the availability of this new skill.
+[docs/design/url-shortener.md](docs/design/url-shortener.md) is a real document produced by the `system-design-architect` skill, including capacity calculations, sharded database justifications, Mermaid.js architecture diagrams, and a global edge redirection strategy.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Licensed under the MIT License — see [LICENSE](LICENSE) for details.
