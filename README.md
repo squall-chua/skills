@@ -40,6 +40,27 @@ A plain-language, concise communication mode. Like a patient old man explaining 
 
 **Trigger it with:** "oldman mode", "keep it simple", "plain English", or `/oldman`. Turn it off with "stop oldman" or "normal mode".
 
+### 🐹 [`golang`](skills/golang/SKILL.md)
+
+One Go (Golang) skill that covers the whole language and its ecosystem, from code style and concurrency to testing, gRPC, databases, and CI. The main `SKILL.md` is only an index of about 100 lines, so it stays cheap to load. Each row points to a topic guide under `references/`, and the agent reads a guide only when the task calls for it. Guides can point to deeper files of their own, so detail loads one level at a time.
+
+**Use it when you want to:**
+
+- Write, review, or debug Go code with idiomatic guidance on hand.
+- Set up a Go project: layout, linting, CI, dependency management, observability.
+- Work with a specific library — cobra, viper, testify, gqlgen, swaggo, wire, dig, fx, or the samber packages.
+
+**What it covers — 45 topic guides, grouped by:**
+
+1. **Writing everyday Go** — style, naming, docs, structs and interfaces, patterns, data structures, errors, context, concurrency, safety, modernizing, refactoring.
+2. **Testing and measuring** — testing, testify, benchmarks, performance, troubleshooting, gopls.
+3. **Building services and tools** — project layout, CLI, cobra, viper, databases, gRPC, GraphQL, Swagger, observability, security.
+4. **Dependency injection** — the general guide plus google/wire, uber-go/dig, uber-go/fx, and samber/do.
+5. **Toolchain and upkeep** — lint, CI, dependency management, library choices, pkg.go.dev lookups, staying updated.
+6. **samber libraries** — lo, mo, oops, hot, ro, and slog.
+
+**Credit:** the topic guides come from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber), MIT licensed. This version merges those 46 separate skills into one skill with an index, so only the relevant parts load. All credit for the Go content belongs to the original authors.
+
 *More skills will be added over time.*
 
 ---
@@ -69,6 +90,12 @@ Once installed, trigger a skill with natural language that matches its purpose �
 
 ---
 
+## 🙏 Credits
+
+- The `golang` skill repackages [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber) and its contributors. The Go guidance is their work; this repo only merged it into one skill with an on-demand index.
+
+---
+
 ## 📄 License
 
-Licensed under the MIT License — see [LICENSE](LICENSE) for details.
+Licensed under the MIT License — see [LICENSE](LICENSE) for details. Bundled third-party content keeps its own license: the `golang` skill guides are MIT licensed from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang).
