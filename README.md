@@ -65,6 +65,34 @@ One Go (Golang) skill that covers the whole language and its ecosystem, from cod
 
 ---
 
+## 🤖 Available agents
+
+Skills teach one agent how to do a task. **Agents** are separate helpers you hand a whole task to. Each one runs in its own context and reports back. They live in [`agents/`](agents/).
+
+### 🔍 [`auditor`](agents/auditor.md)
+
+Checks that work claimed done is really done. It runs the code instead of just reading it, then compares what it finds against the spec. Use it when a task is marked complete but unproven, when the app should work end to end but doesn't, or when a summary looks too clean.
+
+### 🚚 CLI delegates
+
+Five agents that hand a task to another command-line coding tool and bring the answer back:
+
+| Agent | Runs | Notes |
+| --- | --- | --- |
+| [`agy`](agents/agy.md) | `agy` | Reads its model list live with `agy models`. |
+| [`claude-cli`](agents/claude-cli.md) | `claude` | A fresh Claude session with its own context. |
+| [`copilot`](agents/copilot.md) | `copilot` | GitHub Copilot CLI. |
+| [`codex`](agents/codex.md) | `codex` | OpenAI Codex CLI. |
+| [`opencode`](agents/opencode.md) | `opencode` | Model names use `provider/model` form. |
+
+All five follow the same three rules:
+
+1. **You pick the model.** If you don't name one, the agent asks first. Your configured default is offered as the first choice.
+2. **Only when you ask.** These agents are never started on their own initiative — you have to name them.
+3. **Login stays with you.** Signing in opens a browser, so the agent never tries. It stops and tells you the command to run yourself.
+
+---
+
 ## 🛠️ Installation & usage
 
 Skills are harness-agnostic. To use one, copy its directory into wherever your agent loads skills from — for example:
@@ -75,6 +103,12 @@ cp -r skills/system-design-architect ~/.claude/skills/
 
 # or project-level
 cp -r skills/system-design-architect .claude/skills/
+```
+
+Agents are single files. Copy the ones you want the same way:
+
+```bash
+cp agents/auditor.md ~/.claude/agents/
 ```
 
 Once installed, trigger a skill with natural language that matches its purpose — e.g.:
