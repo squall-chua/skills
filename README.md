@@ -95,7 +95,20 @@ All five follow the same three rules:
 
 ## 🛠️ Installation & usage
 
-Skills are harness-agnostic. To use one, copy its directory into wherever your agent loads skills from — for example:
+The easiest way is the [Vercel `skills` CLI](https://github.com/vercel-labs/skills). It clones this repo and puts the skills where your agent looks for them:
+
+```bash
+# pick skills and target agents interactively
+npx skills add squall-chua/skills
+
+# one skill, user-level
+npx skills add squall-chua/skills -g -s golang
+
+# everything, no prompts
+npx skills add squall-chua/skills --all
+```
+
+Skills are harness-agnostic, so a plain copy works too:
 
 ```bash
 # Claude Code (user-level)
@@ -105,7 +118,7 @@ cp -r skills/system-design-architect ~/.claude/skills/
 cp -r skills/system-design-architect .claude/skills/
 ```
 
-Agents are single files. Copy the ones you want the same way:
+The `skills` CLI does not handle agents — it only looks for `SKILL.md` files. Agents are single files, so copy the ones you want:
 
 ```bash
 cp agents/auditor.md ~/.claude/agents/
