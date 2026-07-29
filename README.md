@@ -61,6 +61,65 @@ One Go (Golang) skill that covers the whole language and its ecosystem, from cod
 
 **Credit:** the topic guides come from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber), MIT licensed. This version merges those 46 separate skills into one skill with an index, so only the relevant parts load. All credit for the Go content belongs to the original authors.
 
+---
+
+> ### 🧪 The BDD skills are experimental
+>
+> `to-bdd`, `wire-bdd`, `run-bdd`, and `sync-bdd` are new and still being shaped by real use. Their steps, wording, and hand-offs between each other will change. Try them, but read what they produce before you trust it, and keep your `.feature` files in version control so a bad run is one `git checkout` away from undone.
+
+### 🥒 [`to-bdd`](skills/to-bdd/SKILL.md) 🧪
+
+Turns requirements into domain-driven Gherkin/Cucumber `.feature` files. The agent first hunts for the requirements — in the conversation, in repo docs and PRDs, or in whichever issue tracker the project uses — and asks you where they live if it finds nothing that states a real behaviour. It then reads the project to learn its own vocabulary, so the scenarios speak the team's language instead of inventing new terms. Every scenario must end on an outcome someone can actually check; anything that cannot be made testable is reported back to you rather than guessed at.
+
+**Use it when you want to:**
+
+- Convert a PRD, spec, or GitHub issue into acceptance criteria or `.feature` files.
+- Write BDD scenarios that read at the business level, with no selectors, endpoints, or SQL in the steps.
+- Keep scenarios to one behaviour each, with a single `When` and an observable `Then`.
+- Get BDD started on an undocumented codebase, where the code is the only spec there is.
+
+**Undocumented codebase?** When no requirements exist anywhere, the skill loads [`mining-from-code.md`](skills/to-bdd/mining-from-code.md) and recovers the rules from the code itself — existing tests, entry points, guards, domain types, and git history, one slice at a time. What comes back is tagged as *observed* behaviour, not spec: the code shows what the system does, and a bug nobody spots would otherwise become the official requirement. You confirm each rule as intended or wrong before the tag comes off. Rules you mark wrong stay written the way you want them, so they fail on the first run and the bug shows up as a finding.
+
+**Trigger it with:** `/to-bdd`. The skill never fires on its own — you have to call it.
+
+**Credit:** the Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and the domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v).
+
+### 🔌 [`wire-bdd`](skills/wire-bdd/SKILL.md) 🧪
+
+The middle piece between `to-bdd` and `run-bdd`: it writes the step definitions that make your `.feature` files actually runnable. The agent lists every undefined step, reads the project setup to pick the framework it already uses (`@cucumber/cucumber`, `pytest-bdd`, `behave`, `godog`, `cucumber-jvm`, `cucumber`, Reqnroll), finds the real code each step should drive, and writes thin glue that calls the system through its own doors. A step with nothing to call yet is marked pending, not faked green. It finishes by running the suite, so the report of what passes, fails, or is pending comes from real output.
+
+**Use it when you want to:**
+
+- Turn `.feature` files into executable tests using the framework already in the project.
+- Fill in missing step definitions without duplicating the ones that exist.
+- Find out which scenarios have no product code behind them yet.
+
+**Trigger it with:** `/wire-bdd`. Like its siblings, it never fires on its own.
+
+### 📋 [`run-bdd`](skills/run-bdd/SKILL.md) 🧪
+
+The end of the chain: it runs the `.feature` files and writes up what happened. The agent collects every scenario in scope, finds the command the project already uses (`cucumber-js`, `pytest-bdd`, `behave`, `godog`, `cucumber-jvm`, SpecFlow), runs it, and captures the real output. Every verdict must be backed by that captured output — a scenario with no output counts as unrun, not passed. Failures are reported with the broken step, expected against observed, and a cause. The feature files are treated as the spec and are never edited to make a run go green; a scenario that looks wrong is raised as a spec question instead. Scenarios with no step definitions are listed as unwired and handed back to `wire-bdd`. The result is a Markdown report with a summary table, per-feature counts, and evidence under each failure. Each run writes its own timestamped file, so history is kept and the agent can tell you what turned red or green since the last run.
+
+**Use it when you want to:**
+
+- Run the existing `.feature` files and get a readable report of what passed and what did not.
+- See failures with the exact step, the expected value, the observed value, and a likely cause.
+- Find out which scenarios have no step definitions yet, or are blocked on missing test data.
+
+**Trigger it with:** `/run-bdd`. Like `to-bdd`, it never fires on its own.
+
+### 🔄 [`sync-bdd`](skills/sync-bdd/SKILL.md) 🧪
+
+Keeps the `.feature` files honest as requirements change. The agent reads both sides in full — the current requirements from docs, issues, or the conversation, and every scenario in the feature files — then pairs them by behaviour rather than by wording. What does not pair is sorted into **uncovered** (a requirement nothing specifies), **stale** (a scenario whose requirement moved on), and **orphaned** (a scenario with no requirement behind it). You get a drift report with counts and quoted evidence, then a proposed fix per item. Nothing is edited or deleted until you approve it.
+
+**Use it when you want to:**
+
+- Check whether the feature files still describe the product you actually ship.
+- Catch requirements that changed after the scenarios were written.
+- Find scenarios describing behaviour nobody wrote down, before deciding to drop them.
+
+**Trigger it with:** `/sync-bdd`. Like its siblings, it never fires on its own.
+
 *More skills will be added over time.*
 
 ---
@@ -140,9 +199,10 @@ Once installed, trigger a skill with natural language that matches its purpose �
 ## 🙏 Credits
 
 - The `golang` skill repackages [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber) and its contributors. The Go guidance is their work; this repo only merged it into one skill with an on-demand index.
+- The `to-bdd` skill's Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and its domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v), which is MIT licensed. The rules are theirs; this repo restated them as a step-by-step skill.
 
 ---
 
 ## 📄 License
 
-Licensed under the MIT License — see [LICENSE](LICENSE) for details. Bundled third-party content keeps its own license: the `golang` skill guides are MIT licensed from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang).
+Licensed under the MIT License — see [LICENSE](LICENSE) for details. Bundled third-party content keeps its own license: the `golang` skill guides are MIT licensed from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang), and the `to-bdd` skill derives from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) and the MIT-licensed [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill — keep the attribution in [🙏 Credits](#-credits) if you redistribute it.
