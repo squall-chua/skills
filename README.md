@@ -120,6 +120,25 @@ Keeps the `.feature` files honest as requirements change. The agent reads both s
 
 **Trigger it with:** `/sync-bdd`. Like its siblings, it never fires on its own.
 
+> ### 🧬 `mutation-test` is experimental
+>
+> It is new and still being shaped by real use. Its steps, thresholds, and report shape will change. Try it on a branch, read what it writes before you trust the score, and check the tests it adds — a test written to kill a mutant can still be a poor test.
+
+### 🧬 [`mutation-test`](skills/mutation-test/SKILL.md) 🧪
+
+Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that slips through is a *survivor*, and it marks a behaviour nobody is testing. The skill runs the whole loop: confirm the suite is green first, scope which files to mutate, pick and configure the tool your language uses (Stryker, PIT, mutmut, gremlins, cargo-mutants, Infection, and others), run it, then sort every mutant into killed, survived, no coverage, timeout, build error, or equivalent. Each survivor gets one plain sentence naming the behaviour that goes unchecked. Then it kills them: write the test, apply the mutant by hand, watch the new test fail, revert, and confirm the suite is green. A test that does not fail against the mutant has not killed it. The score goes up by killing mutants, never by widening the exclude list. It finishes with a re-run that proves the kills, a threshold committed to the config, and a timestamped Markdown report.
+
+**Use it when you want to:**
+
+- Find out whether your tests would actually catch a bug, not just execute the line.
+- Turn a high coverage number into a real measure of test quality.
+- Get a list of surviving mutants with the missing behaviour spelled out, and tests written to kill them.
+- Set a mutation score gate in CI that runs over changed files instead of the whole repo.
+
+**Trigger it with:** `/mutation-test`. It never fires on its own.
+
+**Credit:** the process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite).
+
 *More skills will be added over time.*
 
 ---
