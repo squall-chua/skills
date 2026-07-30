@@ -53,6 +53,33 @@ say whether each scenario serves that goal or drifts off it.
 One `.feature` file per behaviour area, kebab-case name, one `Feature` block
 per file. Follow the rules below.
 
+Where the files go. When the project already holds `.feature` files, write
+beside them — a spec split across two locations is a spec nobody can read whole.
+Otherwise write to `<module>/features/`, where `<module>` is the root of the
+module whose behaviour you are describing: the nearest directory at or above
+that code holding the project's manifest (`package.json`, `go.mod`,
+`pyproject.toml`, `pom.xml`, `Cargo.toml`, `composer.json`, `Gemfile`, a
+`*.csproj`). Behaviour spanning several modules goes to the repository root
+`features/`. These files are the spec, so they are committed like any other
+source.
+
+Then say where the runner will look, because `features/` at the root is the
+default for some frameworks and wrong for others. A runner pointed at a directory
+your files are not in reports zero scenarios and exits green — a passing build
+over a spec that never executed.
+
+| Framework | Where it expects `.feature` files |
+| --- | --- |
+| `cucumber-js`, `behave`, `godog`, Ruby `cucumber` | `features/` at the root — the default, nothing to configure |
+| `cucumber-jvm` | on the test classpath, normally `src/test/resources/features/` |
+| `pytest-bdd` | resolved relative to the test module, or wherever `bdd_features_base_dir` points |
+| `Reqnroll` / SpecFlow | inside the test project, as project items |
+| any of them, in a monorepo module | wherever you put them — the path has to be set |
+
+Tell the user which case they are in. Where the path needs setting, say so in
+plain words and name `/wire-bdd` as the skill that does it — it never fires on its
+own, so an unspoken hand-off is a hand-off that does not happen.
+
 When a file already covers the behaviour area, read it and add the new scenarios
 to it, keeping every scenario already there. Those are the project's spec, and
 they are often the only written record of the behaviour they describe. A
@@ -60,8 +87,10 @@ scenario that now looks wrong is a drift finding for the user — say so and lea
 it standing, or run `/sync-bdd` for a full reconciliation.
 
 **Done when:** every behaviour from step 1 appears in a scenario, every scenario
-passes the checklist in step 4, and every file you wrote still holds the
-scenarios it held before.
+passes the checklist in step 4, every file you wrote still holds the scenarios it
+held before, every file sits either beside the project's existing `.feature` files
+or in the module's `features/`, and the user has been told where their framework
+expects to find them — including that `/wire-bdd` sets the path when it differs.
 
 ## 4. Check before you finish
 
