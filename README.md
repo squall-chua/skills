@@ -106,7 +106,9 @@ The end of the chain: it runs the `.feature` files and writes up what happened. 
 - See failures with the exact step, the expected value, the observed value, and a likely cause.
 - Find out which scenarios have no step definitions yet, or are blocked on missing test data.
 
-**Trigger it with:** `/run-bdd`. Like `to-bdd`, it never fires on its own.
+Each non-green scenario carries a suggested fix, and a failure is sorted into one of two kinds: a **product fix**, where the spec is right and the code is wrong, or a **spec question**, where the scenario may describe behaviour nobody intended. Only you can settle the second kind, so it goes in the report as a question. Nothing is written to your code or your feature files. Ask it to fix the failures and it changes the product code for the product fixes, supplies the missing fixtures for the blocked scenarios, re-runs the whole suite to prove nothing else turned red, and writes a *second* report beside the first. Spec questions, pending scenarios, and unwired scenarios are left standing — each needs an answer, a piece of planned work, or `/wire-bdd`, none of which a fix run can give.
+
+**Trigger it with:** `/run-bdd`. Like its siblings, it never fires on its own.
 
 ### 🔄 [`sync-bdd`](skills/sync-bdd/SKILL.md) 🧪
 
@@ -126,18 +128,79 @@ Keeps the `.feature` files honest as requirements change. The agent reads both s
 
 ### 🧬 [`mutation-test`](skills/mutation-test/SKILL.md) 🧪
 
-Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that slips through is a *survivor*, and it marks a behaviour nobody is testing. The skill runs the whole loop: confirm the suite is green first, scope which files to mutate, pick and configure the tool your language uses (Stryker, PIT, mutmut, gremlins, cargo-mutants, Infection, and others), run it, then sort every mutant into killed, survived, no coverage, timeout, build error, or equivalent. Each survivor gets one plain sentence naming the behaviour that goes unchecked. Then it kills them: write the test, apply the mutant by hand, watch the new test fail, revert, and confirm the suite is green. A test that does not fail against the mutant has not killed it. The score goes up by killing mutants, never by widening the exclude list. It finishes with a re-run that proves the kills, a threshold committed to the config, and a timestamped Markdown report.
+Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that slips through is a *survivor*, and it marks a behaviour nobody is testing. The skill runs the whole loop: confirm the suite is green first, scope which files to mutate, pick and configure the tool your language uses (Stryker, PIT, mutmut, gremlins, cargo-mutants, Infection, and others), run it, then sort every mutant into killed, survived, no coverage, timeout, build error, or equivalent. Each survivor gets one plain sentence naming the behaviour that goes unchecked, plus the test that would kill it — which file, which case name, which input. Then it stops and writes a timestamped Markdown report. Your tests are not touched.
+
+Ask it to fix things and it goes on: write the test, apply the mutant by hand, watch the new test fail, revert, and confirm the suite is green. A test that does not fail against the mutant has not killed it. The score goes up by killing mutants, never by widening the exclude list. That run re-runs the mutants to prove the kills, puts a threshold in the config, and writes a *second* report beside the first. The before report is written before any test is touched and is never overwritten, so the two files show the real move — the score difference, which files gained, what is still alive, and any mutant that used to be killed and now survives.
 
 **Use it when you want to:**
 
 - Find out whether your tests would actually catch a bug, not just execute the line.
 - Turn a high coverage number into a real measure of test quality.
-- Get a list of surviving mutants with the missing behaviour spelled out, and tests written to kill them.
+- Get a list of surviving mutants with the missing behaviour spelled out and a test suggested for each.
+- Have those tests written and proven, once you have read the report and said go.
 - Set a mutation score gate in CI that runs over changed files instead of the whole repo.
 
 **Trigger it with:** `/mutation-test`. It never fires on its own.
 
-**Credit:** the process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite).
+**Credit:** the process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), MIT licensed.
+
+### 📊 [`code-coverage`](skills/code-coverage/SKILL.md) 🧪
+
+Runs the unit tests with coverage on and turns the number into a plan. The agent confirms the suite is green first, picks the tool your language uses (vitest, jest, `go test -coverprofile`, coverage.py, JaCoCo, Coverlet, cargo-llvm-cov, SimpleCov, and others), turns branch coverage on, and writes down every exclusion with a reason so the denominator stays honest. It reads the machine-readable report — not the HTML — and rolls it up per module and per file. Then it ranks the gaps instead of listing them: how often the file changes in git, how big the gap is, and what the code decides. Money, permissions, and data writes go to the top. Each gap in the top two buckets gets one plain sentence naming the behaviour nobody tests, a label (untested file, untested branch, untested error path, untested edge, unreachable, not worth covering), and a concrete suggested test — which file, which case name, which input. It finishes with a timestamped Markdown report that also recommends a threshold set at the number you actually have and a changed-lines gate for pull requests. Nothing is written to your tests, your config, or CI.
+
+Ask it to close the gaps and it works the ranked list from the top, applies the ratchet, re-runs coverage, and writes a *second* report beside the first. The before report is written before any test is touched and is never overwritten, so the two files show the real move — the point difference on lines and branches, which modules gained, which gaps are still open, and any file that lost coverage.
+
+**Use it when you want to:**
+
+- Get a coverage report broken down by module, package, and file, not one number.
+- Know which uncovered code to test first, ranked by risk instead of by size.
+- Get a specific test suggested for each gap, with the case name and the input.
+- Have those gaps closed for you, once you have read the report and said go.
+- Set a coverage gate that holds, and compare this run against the last one.
+
+**Trigger it with:** `/code-coverage`. It never fires on its own.
+
+**Its sibling:** coverage says a line ran; [`mutation-test`](skills/mutation-test/SKILL.md) says whether the line is checked. Run this one first — it is the cheaper half.
+
+### 🔬 [`static-analysis`](skills/static-analysis/SKILL.md) 🧪
+
+Reads the code without running it, over the paths you name. Give it a module, a package, a folder, or a list of files; give it nothing and it takes the files changed against the repository's default branch — discovered, not assumed — and says so. It checks the tree builds first, because an analyzer that cannot resolve an import invents findings, and a broken build is the one thing that stops the run. A red test suite or no suite at all does not: it analyses anyway and records the fact, which is what makes it the only one of the four that works on untested code. The suite gates the *fixing*, not the reading. Then it runs four kinds of tool, because one of them answers a quarter of the question: a type checker, a linter, a security scanner, and a dead code finder (ESLint, Biome, `tsc`, Ruff, mypy, staticcheck, golangci-lint, SpotBugs, detekt, clippy, PHPStan, RuboCop, Brakeman, clang-tidy, Semgrep, and others). Where the project has a config, that config is the team's decision and it is left alone. Where there is none, correctness and security rules go on and style rules stay off, so the null dereference is not buried under 3,000 quote-mark complaints.
+
+Then it cuts the noise. Findings are grouped by *rule* first, because one rule firing 200 times is one decision and not 200 problems. Each one gets a category — bug, security, correctness risk, maintainability, style, false positive — and is re-ranked by what the code decides, since every linter calls everything an error. Each real finding gets one plain sentence on what goes wrong, a fix written as a diff, and a note on whether the tool can apply it itself. False positives need a written argument and an inline suppression, never a rule switched off across the project. Nothing is written to your code, your config, or CI.
+
+Ask it to apply the fixes and it takes the autofixable bulk in its own commit, runs the build and the suite to prove nothing broke, then works the hand fixes one at a time, and writes a *second* report beside the first.
+
+**Use it when you want to:**
+
+- Point a set of analyzers at specific folders or files and get one readable report.
+- See the real bugs and security findings separated from the style noise.
+- Get a fix diff per finding, and know how many fix themselves.
+- Put a baseline in place so CI fails on new findings without failing on the past.
+- Have the fixes applied and proven, once you have read the report and said go.
+
+**Trigger it with:** `/static-analysis`. It never fires on its own.
+
+### 🧭 [`code-quality`](skills/code-quality/SKILL.md) 🧪
+
+Sits on top of the four above and reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest coverage, mutation, static analysis, and BDD report from every `.reports/` folder, plus anything else it finds there, and turns them into one graded verdict.
+
+Two rules run through it. **The verdict is a floor, not an average** — a repo sound on three dimensions and fragile on the fourth is fragile, because averaging is how a zero disappears. And **absent evidence is never good news** — a missing report, a skipped one, and a stale one all read the same: *unproven*, stated in the verdict as a count.
+
+Freshness is checked before anything is believed: a report describes the commit in its header, so the skill counts the commits since and asks whether any file in the report's scope changed. A report from 47 commits ago is a lead, not evidence. Where a signal is missing or stale, you get one question listing every gap together with the command that fills it and what a skip costs — then whatever you skip is recorded as your decision, in the report, so the next reader does not read the blank as a pass.
+
+The value it adds over the four reports is the cross-read: high coverage with a low mutation score means the tests run the code and check almost none of it; unwired scenarios beside a green suite mean the tick covers fewer scenarios than the count suggests; findings piled up where git churn is highest mark where the next outage comes from.
+
+Then it charts the way up from wherever you actually are. A dimension can be unproven for two opposite reasons and the skill separates them: *unmeasured*, where tests exist and nobody ran the tool, is an afternoon; *untested*, where there is nothing for a tool to measure, is a body of work — and it says so rather than dressing one up as the other. On a **bare** codebase it gives a ladder instead of a scolding: run the analyzers first, since `static-analysis` reads the code without running it and so needs only that the project builds — it reports the missing suite as a fact and analyses anyway; get one test running, because the harness is the only part that costs setup; then write tests where git churn crosses the code that handles money, permissions, or data writes — a short list, not the whole repo; and only then measure. On a **thin** one, a single rule sets the order: low coverage means go for breadth, but high coverage with a low mutation score means go for strength, because more tests of the same kind move the number and not the suite.
+
+**Use it when you want to:**
+
+- One verdict on the code's health instead of four reports to reconcile.
+- To know whether a coverage number means anything, judged against the other signals.
+- A release readiness check that says plainly what it does not know.
+- An ordered list of what to fix first, drawn from every report at once.
+- A starting plan for a codebase with no tests at all, ordered by risk rather than by file.
+
+**Trigger it with:** `/code-quality`. It never fires on its own — and neither do the four skills it draws on, so when a signal is missing it hands you the command to fill it rather than running it for you.
 
 *More skills will be added over time.*
 
@@ -219,9 +282,11 @@ Once installed, trigger a skill with natural language that matches its purpose �
 
 - The `golang` skill repackages [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber) and its contributors. The Go guidance is their work; this repo only merged it into one skill with an on-demand index.
 - The `to-bdd` skill's Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and its domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v), which is MIT licensed. The rules are theirs; this repo restated them as a step-by-step skill.
+- The `mutation-test` skill's process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), which is MIT licensed. The mutation-testing loop is theirs; this repo added the triage buckets, the score formula, and the report.
+- The `code-coverage`, `static-analysis`, and `code-quality` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
 
 ---
 
 ## 📄 License
 
-Licensed under the MIT License — see [LICENSE](LICENSE) for details. Bundled third-party content keeps its own license: the `golang` skill guides are MIT licensed from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang), and the `to-bdd` skill derives from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) and the MIT-licensed [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill — keep the attribution in [🙏 Credits](#-credits) if you redistribute it.
+Licensed under the MIT License — see [LICENSE](LICENSE) for details. Bundled third-party content keeps its own license: the `golang` skill guides are MIT licensed from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang), the `to-bdd` skill derives from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) and the MIT-licensed [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill, and `mutation-test` derives from the MIT-licensed [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) — keep the attribution in [🙏 Credits](#-credits) if you redistribute it. The `writing-great-skills` influence noted there is method rather than bundled text, so it carries no license obligation, but the credit stands.

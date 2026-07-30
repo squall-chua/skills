@@ -43,6 +43,11 @@ Installed framework wins over the table every time. When none is installed,
 name the one that fits the stack and get the user's go-ahead before adding the
 dependency.
 
+Every framework reads its `.feature` files from a configured path, and most
+default to `features/` at the root. Find where this project's files actually are
+— under a module folder in a monorepo — and set that path to match. A runner
+pointed at an empty directory reports zero scenarios and passes.
+
 **Done when:** you know the framework, the file layout, the runner command, and
 — if step definitions already exist — the conventions they follow: naming,
 async style, how state passes between steps, where the support code sits.
