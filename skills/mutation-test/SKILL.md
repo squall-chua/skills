@@ -64,6 +64,18 @@ Prefer the tool the project already has. Otherwise:
 | Swift | `muter` |
 | Elixir | `muzak` |
 
+### Nothing installed?
+
+Look before you install: the manifest and its lockfile, the CI workflows, the project's own
+config files, and the binary on `PATH`. A tool declared in the manifest but missing from the
+environment needs the project's own install command, not a new dependency.
+
+Where the project genuinely has none, put the setup to the user in one message — the tool and
+why it fits this project, the exact install command, the config file with its contents, the
+command this skill will then run, and what it costs in download size and first-run time — and
+wait for the go-ahead. A new dependency changes the manifest and the lockfile, which is the
+user's call. Then install exactly that, leave the config in the repo, and commit nothing.
+
 Read the tool's own docs for its current config schema — flag names and file formats drift
 between versions, and a config written from memory fails in ways that look like broken code.
 
@@ -78,8 +90,9 @@ real score.
 
 Leave the config file in the repo, so the next run and CI use the same settings.
 
-**Done when:** the config file exists in the repo, a single-file trial run completes, and it
-writes the machine-readable report you asked for.
+**Done when:** the tool was already present or the user approved its setup, the config file
+exists in the repo, a single-file trial run completes, and it writes the machine-readable
+report you asked for.
 
 ## 4. Run and capture
 

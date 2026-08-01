@@ -98,7 +98,7 @@ The middle piece between `to-bdd` and `run-bdd`: it writes the step definitions 
 
 ### 📋 [`run-bdd`](skills/run-bdd/SKILL.md) 🧪
 
-The end of the chain: it runs the `.feature` files and writes up what happened. The agent collects every scenario in scope, finds the command the project already uses (`cucumber-js`, `pytest-bdd`, `behave`, `godog`, `cucumber-jvm`, SpecFlow), runs it, and captures the real output. Every verdict must be backed by that captured output — a scenario with no output counts as unrun, not passed. Failures are reported with the broken step, expected against observed, and a cause. The feature files are treated as the spec and are never edited to make a run go green; a scenario that looks wrong is raised as a spec question instead. Scenarios with no step definitions are listed as unwired and handed back to `wire-bdd`. The result is a Markdown report with a summary table, per-feature counts, and evidence under each failure. Each run writes its own timestamped file, so history is kept and the agent can tell you what turned red or green since the last run.
+The end of the chain: it runs the `.feature` files and writes up what happened. The agent finds the command the project already uses (`cucumber-js`, `pytest-bdd`, `behave`, `godog`, `cucumber-jvm`, SpecFlow), runs it, and backs every verdict with the captured output — a scenario with no output counts as unrun, not passed. The feature files are the spec and are never edited to make a run go green; a scenario that looks wrong is raised as a spec question, and one with no step definitions is listed as unwired and handed back to `wire-bdd`. Each run writes its own timestamped report, so the agent can say what turned red or green since the last one.
 
 **Use it when you want to:**
 
@@ -106,7 +106,7 @@ The end of the chain: it runs the `.feature` files and writes up what happened. 
 - See failures with the exact step, the expected value, the observed value, and a likely cause.
 - Find out which scenarios have no step definitions yet, or are blocked on missing test data.
 
-Each non-green scenario carries a suggested fix, and a failure is sorted into one of two kinds: a **product fix**, where the spec is right and the code is wrong, or a **spec question**, where the scenario may describe behaviour nobody intended. Only you can settle the second kind, so it goes in the report as a question. Nothing is written to your code or your feature files. Ask it to fix the failures and it changes the product code for the product fixes, supplies the missing fixtures for the blocked scenarios, re-runs the whole suite to prove nothing else turned red, and writes a *second* report beside the first. Spec questions, pending scenarios, and unwired scenarios are left standing — each needs an answer, a piece of planned work, or `/wire-bdd`, none of which a fix run can give.
+Each failure is sorted into a **product fix**, where the spec is right and the code is wrong, or a **spec question**, where the scenario may describe behaviour nobody intended — only you can settle the second, so it goes in the report as a question. Nothing is written until you say go. Ask it to fix the failures and it changes the product code, supplies the missing fixtures, re-runs the whole suite to prove nothing else turned red, and writes a *second* report beside the first. Spec questions, pending scenarios, and unwired scenarios are left standing, since each needs an answer, planned work, or `/wire-bdd`.
 
 **Trigger it with:** `/run-bdd`. Like its siblings, it never fires on its own.
 
@@ -122,23 +122,24 @@ Keeps the `.feature` files honest as requirements change. The agent reads both s
 
 **Trigger it with:** `/sync-bdd`. Like its siblings, it never fires on its own.
 
-> ### 🧬 `mutation-test` is experimental
+> ### 🧪 The test and quality skills are experimental
 >
-> It is new and still being shaped by real use. Its steps, thresholds, and report shape will change. Try it on a branch, read what it writes before you trust the score, and check the tests it adds — a test written to kill a mutant can still be a poor test.
+> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
+>
+> Three habits make them safe to try. Run them on a branch, so a bad run is one `git checkout` away from undone. Read the report before you trust the number — each says plainly what it did not measure, and that part matters more than the score. And check anything a fix run writes: a test written to kill a mutant can still be a poor test, and a fix that closes one finding can open another.
+>
+> `fault-injection-test` and `stress-test` put a running system in trouble on purpose. Never point either at production or shared staging without the authorization its third step asks for.
 
 ### 🧬 [`mutation-test`](skills/mutation-test/SKILL.md) 🧪
 
-Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that slips through is a *survivor*, and it marks a behaviour nobody is testing. The skill runs the whole loop: confirm the suite is green first, scope which files to mutate, pick and configure the tool your language uses (Stryker, PIT, mutmut, gremlins, cargo-mutants, Infection, and others), run it, then sort every mutant into killed, survived, no coverage, timeout, build error, or equivalent. Each survivor gets one plain sentence naming the behaviour that goes unchecked, plus the test that would kill it — which file, which case name, which input. Then it stops and writes a timestamped Markdown report. Your tests are not touched.
-
-Ask it to fix things and it goes on: write the test, apply the mutant by hand, watch the new test fail, revert, and confirm the suite is green. A test that does not fail against the mutant has not killed it. The score goes up by killing mutants, never by widening the exclude list. That run re-runs the mutants to prove the kills, puts a threshold in the config, and writes a *second* report beside the first. The before report is written before any test is touched and is never overwritten, so the two files show the real move — the score difference, which files gained, what is still alive, and any mutant that used to be killed and now survives.
+Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that survives marks a behaviour nobody is testing. You get a timestamped report listing every survivor, the behaviour it exposes, and the test that would kill it. Your tests are not touched until you say go.
 
 **Use it when you want to:**
 
 - Find out whether your tests would actually catch a bug, not just execute the line.
 - Turn a high coverage number into a real measure of test quality.
-- Get a list of surviving mutants with the missing behaviour spelled out and a test suggested for each.
-- Have those tests written and proven, once you have read the report and said go.
-- Set a mutation score gate in CI that runs over changed files instead of the whole repo.
+- Have the missing tests written and proven, once you have read the report and said go.
+- Set a mutation score gate in CI that runs over changed files.
 
 **Trigger it with:** `/mutation-test`. It never fires on its own.
 
@@ -146,9 +147,7 @@ Ask it to fix things and it goes on: write the test, apply the mutant by hand, w
 
 ### 📊 [`code-coverage`](skills/code-coverage/SKILL.md) 🧪
 
-Runs the unit tests with coverage on and turns the number into a plan. The agent confirms the suite is green first, picks the tool your language uses (vitest, jest, `go test -coverprofile`, coverage.py, JaCoCo, Coverlet, cargo-llvm-cov, SimpleCov, and others), turns branch coverage on, and writes down every exclusion with a reason so the denominator stays honest. It reads the machine-readable report — not the HTML — and rolls it up per module and per file. Then it ranks the gaps instead of listing them: how often the file changes in git, how big the gap is, and what the code decides. Money, permissions, and data writes go to the top. Each gap in the top two buckets gets one plain sentence naming the behaviour nobody tests, a label (untested file, untested branch, untested error path, untested edge, unreachable, not worth covering), and a concrete suggested test — which file, which case name, which input. It finishes with a timestamped Markdown report that also recommends a threshold set at the number you actually have and a changed-lines gate for pull requests. Nothing is written to your tests, your config, or CI.
-
-Ask it to close the gaps and it works the ranked list from the top, applies the ratchet, re-runs coverage, and writes a *second* report beside the first. The before report is written before any test is touched and is never overwritten, so the two files show the real move — the point difference on lines and branches, which modules gained, which gaps are still open, and any file that lost coverage.
+Runs the unit tests with coverage on and turns the number into a plan. The agent picks the tool your language uses, turns branch coverage on, and records every exclusion with a reason. Then it ranks the gaps instead of listing them — git churn crossed with what the code decides, so money, permissions, and data writes go to the top. Each gap near the top names the behaviour nobody tests and a concrete test to add. Nothing is written to your tests, your config, or CI until you say go.
 
 **Use it when you want to:**
 
@@ -164,43 +163,155 @@ Ask it to close the gaps and it works the ranked list from the top, applies the 
 
 ### 🔬 [`static-analysis`](skills/static-analysis/SKILL.md) 🧪
 
-Reads the code without running it, over the paths you name. Give it a module, a package, a folder, or a list of files; give it nothing and it takes the files changed against the repository's default branch — discovered, not assumed — and says so. It checks the tree builds first, because an analyzer that cannot resolve an import invents findings, and a broken build is the one thing that stops the run. A red test suite or no suite at all does not: it analyses anyway and records the fact, which is what makes it the only one of the four that works on untested code. The suite gates the *fixing*, not the reading. Then it runs four kinds of tool, because one of them answers a quarter of the question: a type checker, a linter, a security scanner, and a dead code finder (ESLint, Biome, `tsc`, Ruff, mypy, staticcheck, golangci-lint, SpotBugs, detekt, clippy, PHPStan, RuboCop, Brakeman, clang-tidy, Semgrep, and others). Where the project has a config, that config is the team's decision and it is left alone. Where there is none, correctness and security rules go on and style rules stay off, so the null dereference is not buried under 3,000 quote-mark complaints.
-
-Then it cuts the noise. Findings are grouped by *rule* first, because one rule firing 200 times is one decision and not 200 problems. Each one gets a category — bug, security, correctness risk, maintainability, style, false positive — and is re-ranked by what the code decides, since every linter calls everything an error. Each real finding gets one plain sentence on what goes wrong, a fix written as a diff, and a note on whether the tool can apply it itself. False positives need a written argument and an inline suppression, never a rule switched off across the project. Nothing is written to your code, your config, or CI.
-
-Ask it to apply the fixes and it takes the autofixable bulk in its own commit, runs the build and the suite to prove nothing broke, then works the hand fixes one at a time, and writes a *second* report beside the first.
+Reads the code without running it, over the paths you name — or over the files changed against the default branch if you name none. It runs three kinds of tool: a type checker, a linter, and a dead code finder. Then it cuts the noise. Findings are grouped by *rule*, because one rule firing 200 times is one decision and not 200 problems, then categorised and re-ranked by what the code decides. Each real finding gets one plain sentence on what goes wrong and a fix written as a diff. It works on untested code: a red suite or no suite does not stop the reading, only the fixing. Security sits outside this run — that is `security-compliance`. Nothing is changed until you say go.
 
 **Use it when you want to:**
 
 - Point a set of analyzers at specific folders or files and get one readable report.
-- See the real bugs and security findings separated from the style noise.
+- See the real bugs separated from the style noise.
 - Get a fix diff per finding, and know how many fix themselves.
 - Put a baseline in place so CI fails on new findings without failing on the past.
 - Have the fixes applied and proven, once you have read the report and said go.
 
 **Trigger it with:** `/static-analysis`. It never fires on its own.
 
-### 🧭 [`code-quality`](skills/code-quality/SKILL.md) 🧪
+### 🤝 [`contract-test`](skills/contract-test/SKILL.md) 🧪
 
-Sits on top of the four above and reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest coverage, mutation, static analysis, and BDD report from every `.reports/` folder, plus anything else it finds there, and turns them into one graded verdict.
-
-Two rules run through it. **The verdict is a floor, not an average** — a repo sound on three dimensions and fragile on the fourth is fragile, because averaging is how a zero disappears. And **absent evidence is never good news** — a missing report, a skipped one, and a stale one all read the same: *unproven*, stated in the verdict as a count.
-
-Freshness is checked before anything is believed: a report describes the commit in its header, so the skill counts the commits since and asks whether any file in the report's scope changed. A report from 47 commits ago is a lead, not evidence. Where a signal is missing or stale, you get one question listing every gap together with the command that fills it and what a skip costs — then whatever you skip is recorded as your decision, in the report, so the next reader does not read the blank as a pass.
-
-The value it adds over the four reports is the cross-read: high coverage with a low mutation score means the tests run the code and check almost none of it; unwired scenarios beside a green suite mean the tick covers fewer scenarios than the count suggests; findings piled up where git churn is highest mark where the next outage comes from.
-
-Then it charts the way up from wherever you actually are. A dimension can be unproven for two opposite reasons and the skill separates them: *unmeasured*, where tests exist and nobody ran the tool, is an afternoon; *untested*, where there is nothing for a tool to measure, is a body of work — and it says so rather than dressing one up as the other. On a **bare** codebase it gives a ladder instead of a scolding: run the analyzers first, since `static-analysis` reads the code without running it and so needs only that the project builds — it reports the missing suite as a fact and analyses anyway; get one test running, because the harness is the only part that costs setup; then write tests where git churn crosses the code that handles money, permissions, or data writes — a short list, not the whole repo; and only then measure. On a **thin** one, a single rule sets the order: low coverage means go for breadth, but high coverage with a low mutation score means go for strength, because more tests of the same kind move the number and not the suite.
+Tests a running API against its own contract, from the outside. The source is never opened: every finding comes from a request the agent sent and the response it got back, so the report says what a real consumer hits. A gap between the promise and the behaviour is a *drift*. The agent finds the contract — published in the repo, served by the running app, or derived from the route definitions — runs a conformance tool against a target you pin, then sends by hand the promises no tool checks on its own: guards, error bodies, media types, unknown ids, pagination. Two numbers come out side by side: how much of the contract was exercised, and how much of that had no drift. Your API source is never edited.
 
 **Use it when you want to:**
 
-- One verdict on the code's health instead of four reports to reconcile.
+- Check that a deployed API still matches the OpenAPI, GraphQL, gRPC, or AsyncAPI contract it publishes.
+- Test an API that publishes no contract at all — the agent derives one and leaves the file behind as a first draft.
+- Test an API you cannot or should not read the source of — a third party's, another team's, a legacy service.
+- Find the breaking changes a deploy introduced, before the consumers find them.
+- Know which part of your contract has never actually been tested.
+- Keep the hand-sent probes as a checked-in suite that runs in seconds.
+- Set up a CI gate that judges on new drift instead of a total count.
+
+**Trigger it with:** `/contract-test`. It never fires on its own.
+
+**Its siblings:** coverage and mutation testing look inward at the code; this one stands outside the box and asks whether the API keeps its word.
+
+### 🔗 [`integration-test`](skills/integration-test/SKILL.md) 🧪
+
+Writes the tests that run against your real database, broker, cache, and object store. A *seam* is where your code hands work to something it does not own. Unit tests stop at the seam and mock what is on the far side, so everything they prove is a statement about your own mock. This skill crosses it: one rule sorts the seams — run the collaborators you own in a container the suite starts itself, fake the ones you do not — and a seam left mocked in-process is reported as *unproven* rather than counted. Every test is *proven red* before it is trusted, and the suite is proven *hermetic* four ways: alone, shuffled, twice with no wipe, and in parallel. Your production code is left alone.
+
+**Use it when you want to:**
+
+- Get real integration tests written for the database, queue, cache, or storage your code actually talks to.
+- Replace mocks that pass while production breaks.
+- Find out which of your collaborators have never been tested for real.
+- Fix a flaky integration suite, or prove a new one is not flaky before you trust it.
+- Set up containers that start themselves, so a fresh clone and CI both just work.
+
+**Trigger it with:** `/integration-test`. It never fires on its own.
+
+### 💥 [`fault-injection-test`](skills/fault-injection-test/SKILL.md) 🧪
+
+Breaks the environment under your running system and watches what happens. First it writes down the *steady state* — the few numbers that say the system is serving people, each with the command that reads it and a tolerance band. Then it takes the dependencies down, slows them past the timeout, makes them flap, fills the disk, kills a container mid-request, and partitions the network, one fault at a time, with a hypothesis written before each run. The blast radius, the abort condition, and the kill switch are all fixed first, and the kill switch is tested while nothing is wrong. Two things come out: how many experiments held their steady state, and whether it came back afterwards. Your production code is not touched until you say go.
+
+Ask it to fix things and it adds one mechanism at a time — a timeout, backoff with jitter, a circuit breaker, a bulkhead, an idempotency key, a fallback — then re-runs the *identical* experiment to prove it. Same fault, same hold time, same load, before and after. Widening a tolerance band or softening a fault to turn a red into a green is called out as rewriting the exam.
+
+**Use it when you want to:**
+
+- Find out whether your system survives its database, cache, broker, or payment provider going down.
+- Catch the failure that matters more than any of them: the system that never comes back after the fault stops.
+- See which weakness is missing a timeout, a retry budget, a circuit breaker, or a fallback.
+- Learn what a fault actually does to a customer, and whether anything alerted anybody.
+- Discover the coupling nobody knew about, when breaking one thing moves something else.
+- Have the resilience added and proven by re-running the same fault, once you have read the report and said go.
+
+**Trigger it with:** `/fault-injection-test`. It never fires on its own.
+
+**Needs:** a running system under a realistic load, and a container runtime for the injector. Production or shared staging needs recorded authorization first.
+
+### 📈 [`stress-test`](skills/stress-test/SKILL.md) 🧪
+
+Raises the load until your system stops keeping up, and finds the *knee* — the point where throughput stops rising and latency starts climbing. Below it, more load means more work done; above it, more load means only more waiting. Then it names what gave first: the connection pool, one pinned core, garbage collection, a query without an index. A knee with no cause named is a number nobody can act on. The figure it leads with is **headroom** — the knee divided by the peak you actually have to serve, which is the one number someone outside the team can use.
+
+It is strict about one thing above all. A load generator that waits for each response before sending the next stops sending when the system stalls, so the slowest requests are never made and never recorded — that is *coordinated omission*, and it is why so many load tests report a p99 that the real peak walks straight through. This skill runs an open model at a constant arrival rate, records latency against the time each request was *due* to be sent, and states the arrival model in the report header so you can tell whether the percentiles mean anything. Five shapes run, not one: smoke, load, stress, soak, and spike. Your code is not touched until you say go.
+
+**Use it when you want to:**
+
+- Find out how much traffic your system takes before it stops keeping up, and how much room that leaves.
+- Know which resource is the actual limit, so the performance work goes where it will move something.
+- Catch the leak a short run cannot see — connections, memory, or file handles climbing over hours.
+- Find out whether overload settles at a limit or collapses, because retries can make a busy system worse.
+- Get a load test whose percentiles are not quietly flattering.
+- Have the knee raised and proven by re-running the same profile, once you have read the report and said go.
+
+**Trigger it with:** `/stress-test`. It never fires on its own.
+
+**Needs:** a running instance and a load generator. Shared staging or production needs recorded authorization first, and third parties are stubbed by default.
+
+### ♿ [`visual-accessibility`](skills/visual-accessibility/SKILL.md) 🧪
+
+Drives your running UI in a real browser and checks it against WCAG. A rules engine sees about a third of WCAG, and it is not the third that stops people — so the agent runs whichever engine your project already has (axe, Pa11y, Lighthouse, jest-axe), then drives the rest by hand with the [`vibium`](https://github.com/vibium/vibium) browser CLI: tab order, focus visibility, keyboard traps, reflow at 320px, reduced motion, forced colours, live regions. Findings are ranked by *barrier* — what a person cannot do because of it — so a keyboard trap in checkout outranks a contrast miss on a footer link. Every finding carries the command that reproduces it and a screenshot. Your UI source is left alone.
+
+**Use it when you want to:**
+
+- Get a WCAG report on the running app, not on the markup as written.
+- Find the barriers a scanner cannot see — focus order, focus rings, keyboard traps, live regions.
+- Know which of your accessibility findings actually stop somebody finishing a task.
+- See which success criteria nothing checked, named as gaps rather than passes.
+- Check the app at 320px, at 200% zoom, in dark mode, and under forced colours.
+- Set gates that catch a palette change before it moves every screen at once.
+
+**Trigger it with:** `/visual-accessibility`. It never fires on its own.
+
+**Needs:** a running instance and the `vibium` CLI. No test suite required.
+
+### 🫠 [`visual-slop`](skills/visual-slop/SKILL.md) 🧪
+
+Checks your running UI against the [pols.dev anti-slop design law](https://pols.dev/slop.md) — about 150 named *tells* of a generated interface, fetched fresh each run and walked heading by heading, so the review is against the law rather than against the agent's taste. Findings are ranked by what they *stack* with: one pill is a choice, but an icon tile plus a category pill plus tag chips plus a hairline border plus a glowy button in one card is the clearest slop signature there is. Because the law's own deepest point is that dodging the list is still slop, every finding carries the replacement rather than just the removal, and the page gets one verdict on whether it has a signature at all. Nothing is changed until you say go.
+
+Ask it to fix things and it builds the *signature first*, before removing a single tell — strip the tells from a page with nothing decided and you get a cleaner page that still reads as generated. Then it works P1 defects, the stacked elements, and the single tells, checking each change three ways: the style sweep again, fresh screenshots, and a re-walk of the headings that change could touch, since swapping a glow for a hairline border trades one tell for another. It writes a *second* report beside the first, with the before and after pictures of each rebuilt element side by side.
+
+**Use it when you want to:**
+
+- Find out whether your interface reads as AI-made, and exactly which parts give it away.
+- Get the design tells separated from the real defects — dead controls, clipped text, sections that render empty.
+- See which single element is carrying the most tells at once.
+- Get a proposed replacement per finding, with the reason, instead of a list of things to delete.
+- Find out whether the page has a signature, or is merely clean.
+- Have the rebuild done and proven, once you have read the report and said go.
+
+**Trigger it with:** `/visual-slop`. It never fires on its own.
+
+**Needs:** a running instance, the `vibium` CLI, and network access to fetch the law.
+
+### 🛡️ [`security-compliance`](skills/security-compliance/SKILL.md) 🧪
+
+Scans the code, its dependencies, its full git history, and the running app, then sorts the findings by the only fact that decides which one matters: *reach*. A CVSS 9.8 in a build-time dependency reaches nobody; a 5.3 on an unauthenticated route reaches everybody, and it is the one that gets used. So every finding carries a path — entry point, route through the code, sink — or a written argument for why no path exists. What scanners are useless at, the agent reads by hand: IDOR, missing route authorization, tenant isolation, SSRF, business logic, crypto misuse, and what leaks into logs. DAST runs only with authorization recorded first — approver, staging target, hosts, window, and rate limit. Secret values and captured PII stay out of the report.
+
+**Use it when you want to:**
+
+- Get one security review across code, dependencies, history, containers, and the live app.
+- Find out which of your hundreds of CVEs an attacker can actually reach.
+- See your findings mapped to OWASP Top 10 and CWE, with the categories no tool checked named as gaps.
+- Run an authorized DAST pass against staging with the scope and window recorded.
+- Get a fix per finding, and know which need a design change rather than a patch.
+- Set the four CI gates, including the scheduled dependency scan — a repo clean on Friday is vulnerable on Monday and no commit announces it.
+
+**Trigger it with:** `/security-compliance`. It never fires on its own.
+
+### 🧭 [`code-quality`](skills/code-quality/SKILL.md) 🧪
+
+The front door to all ten dimensions, and the skill that reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest report of each kind from every `.reports/` folder, checks each is still fresh enough to believe, cross-reads them, and gives one graded verdict. The verdict is a floor, not an average, and a report that is missing, skipped, or stale counts as *unproven* rather than as a pass.
+
+Called on a repo with no reports at all, it works out which of the ten dimensions that project should cover, which do not apply, and which are a practice the team may take or leave — then hands over the command for each, in the order worth doing them. It is equally careful about what your question can answer: the ten split into three families by what each is measured against — the code, the test suite, or a running system — so asking about one module marks four of them **out of scope** rather than unproven, because unproven reads as work somebody skipped and this is work nobody could have done at the scope you gave.
+
+**Use it when you want to:**
+
+- A starting point when you have run none of these skills and want to know which ones your project needs.
+- One verdict on the code's health instead of ten reports to reconcile.
 - To know whether a coverage number means anything, judged against the other signals.
-- A release readiness check that says plainly what it does not know.
+- A release readiness check that says plainly what it does not know, and what your scope could never have told it.
 - An ordered list of what to fix first, drawn from every report at once.
 - A starting plan for a codebase with no tests at all, ordered by risk rather than by file.
 
-**Trigger it with:** `/code-quality`. It never fires on its own — and neither do the four skills it draws on, so when a signal is missing it hands you the command to fill it rather than running it for you.
+**Trigger it with:** `/code-quality`. It never fires on its own — and neither do the sibling skills it draws on, so when a signal is missing it hands you the command to fill it rather than running it for you.
 
 *More skills will be added over time.*
 
