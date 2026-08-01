@@ -1,14 +1,14 @@
 ---
 name: static-analysis
 description: >
-  Run the type checker, linter, security scanner, and dead code finder over the
-  paths you name, cut the noise, and report each finding with a fix diff.
+  Run the type checker, linter, and dead code finder over the paths you name, cut the
+  noise, and report each finding with a fix diff.
 disable-model-invocation: true
 ---
 
 A static analyzer reads the code without running it, so it finds what tests never
-reach — the branch nobody takes, the error nobody handles, the secret nobody meant to
-commit. It also finds **noise**: naming opinions, rules the team never agreed to,
+reach — the branch nobody takes, the error nobody handles, the export nothing imports.
+It also finds **noise**: naming opinions, rules the team never agreed to,
 warnings the analyzer is wrong about. A run that hands over 4,000 findings has said
 nothing. Separating the two is the whole job.
 
@@ -77,48 +77,65 @@ its absence established, and the suite's state is recorded for step 8.
 
 ## 3. Pick the analyzers and read the project's rules
 
-Four kinds of tool answer four questions; running one answers a quarter:
+Three kinds of tool answer three questions; running one answers a third:
 
 | Kind | What it finds |
 | --- | --- |
 | **Type checker** | the code contradicts itself — wrong argument, missing case, impossible narrowing |
 | **Linter / bug finder** | the code does other than it says — ignored return, unreachable branch, resource leak |
-| **Security scanner** | injection, hardcoded secrets, weak crypto, unsafe deserialization |
 | **Dead code finder** | exports, files, and dependencies nothing reaches |
+
+Security sits outside this run: ranking a vulnerability needs the dependency tree, the git
+history, and a live target — evidence a code read does not hold. Where the project's own
+config emits a security finding anyway, step 5 records and passes it on.
 
 Prefer the tools the project already has, in its configs and CI. Fill gaps from here:
 
-| Language | Lint / bug | Types | Security | Dead code |
-| --- | --- | --- | --- | --- |
-| JavaScript / TypeScript | ESLint, Biome | `tsc --noEmit` | Semgrep, `npm audit` | knip |
-| Python | Ruff, pylint | mypy, pyright | bandit, Semgrep | vulture |
-| Go | `go vet`, staticcheck, golangci-lint | compiler | gosec | `deadcode` |
-| Java / Kotlin | SpotBugs, PMD, Error Prone, detekt | compiler | FindSecBugs | — |
-| C# / .NET | Roslyn analyzers, SonarAnalyzer | compiler | Security Code Scan | — |
-| Rust | `cargo clippy` | compiler | `cargo audit` | `cargo-udeps` |
-| PHP | PHPStan, Psalm | PHPStan, Psalm | Psalm taint analysis | — |
-| Ruby | RuboCop | Sorbet, Steep | Brakeman | — |
-| Swift | SwiftLint | compiler | — | periphery |
-| C / C++ | clang-tidy, cppcheck | compiler | clang static analyzer | — |
+| Language | Lint / bug | Types | Dead code |
+| --- | --- | --- | --- |
+| JavaScript / TypeScript | ESLint, Biome | `tsc --noEmit` | knip |
+| Python | Ruff, pylint | mypy, pyright | vulture |
+| Go | `go vet`, staticcheck, golangci-lint | compiler | `deadcode` |
+| Java / Kotlin | SpotBugs, PMD, Error Prone, detekt | compiler | — |
+| C# / .NET | Roslyn analyzers, SonarAnalyzer | compiler | — |
+| Rust | `cargo clippy` | compiler | `cargo-udeps` |
+| PHP | PHPStan, Psalm | PHPStan, Psalm | — |
+| Ruby | RuboCop | Sorbet, Steep | — |
+| Swift | SwiftLint | compiler | periphery |
+| C / C++ | clang-tidy, cppcheck | compiler | — |
 
-Semgrep and CodeQL work across languages and are the fallback where a language has no
-strong native tool. Read each tool's own docs for current flags — names drift between
-versions, and a config written from memory fails in ways that look like broken code.
+### Nothing installed?
+
+Look before you install: the manifest and its lockfile, the CI workflows, the project's own
+config files, and the binary on `PATH`. A tool declared in the manifest but missing from the
+environment needs the project's own install command, not a new dependency.
+
+Where the project genuinely has none, put all three proposals to the user in one message —
+per kind: the tool and why it fits this project, the exact install command, the config file
+with its contents, the command this skill will then run, and what it costs in download size
+and first-run time — and wait for the go-ahead. A new dependency changes the manifest and the
+lockfile, which is the user's call, and one message lets them take some kinds and leave
+others. Install exactly what they accepted, leave the config in the repo, and commit nothing.
+Record every kind they decline as a gap in the report rather than a clean result, since a
+kind nobody ran found nothing by definition.
+
+Read each tool's own docs for current flags — names drift between versions, and a config
+written from memory fails in ways that look like broken code.
 
 **The project's config is the project's decision.** Where one exists, run with it and
 leave it alone; a run that overrides it reports on a codebase nobody is writing.
 
 Where none exists, this single choice decides whether the report is worth reading: turn
-on correctness and security rules, leave style rules off. Style belongs to a formatter,
+on correctness and bug-finding rules, leave style rules off. Style belongs to a formatter,
 and 3,000 quote-mark complaints bury the null dereference on page 40. Write down the
 rule set you chose and why.
 
 Ask each tool for machine-readable output — SARIF, else JSON or checkstyle XML — written
 to a file. You read that, not the terminal.
 
-**Done when:** each of the four kinds is running or written down as unavailable for this
-language, the rule set is the project's config or a recorded choice of your own, and
-every tool writes a machine-readable file.
+**Done when:** each of the three kinds is running, or written down as unavailable for this
+language or declined by the user; the rule set is the project's config or a recorded choice
+of your own; and every tool writes a machine-readable file.
 
 ## 4. Run and capture
 
@@ -141,7 +158,7 @@ Then categorise:
 | Category | What it means |
 | --- | --- |
 | 🐛 **Bug** | already does the wrong thing — null dereference, wrong comparison, unreachable branch, leaked handle |
-| 🔒 **Security** | injection, committed secret, weak crypto, unsafe deserialization, known-vulnerable dependency |
+| 🔒 **Security** | injection, committed secret, weak crypto, unsafe deserialization. Recorded and passed on — see below |
 | ⚠️ **Correctness risk** | right today, wrong on a plausible input — ignored error, swallowed exception, missing default |
 | 🧹 **Maintainability** | complexity, duplication, dead code. Real, not urgent |
 | 🎨 **Style** | formatting, naming, import order. A formatter's job |
@@ -150,8 +167,8 @@ Then categorise:
 A tool's severity is its opinion about a rule in general, not about your code — every
 linter calls everything an error. Re-rank by what the code decides:
 
-- **P1** — any bug or security finding. Also anything in code that moves money, checks
-  permissions, or writes data.
+- **P1** — any bug finding. Also anything in code that moves money, checks permissions, or
+  writes data.
 - **P2** — a correctness risk, or maintainability in a file changed 5+ times in 6 months:
   ```sh
   git log --since='6 months ago' --name-only --format= -- <path> | grep . | sort | uniq -c | sort -rn
@@ -159,6 +176,10 @@ linter calls everything an error. Re-rank by what the code decides:
   The `grep .` matters: `--name-only` prints a blank line between commits, and without it
   the blank sorts to the top as your busiest file.
 - **P3** — everything else, style included.
+
+A security finding takes no bucket. It goes to its own section of the report with its rule,
+its file and line, and the tool that raised it, and is handed on for a run that can weigh it
+against the dependency tree, the history, and a live target.
 
 For every P1 and P2, read the code and write one sentence naming the **consequence**, not
 the rule text. "A refund with no `orderId` throws before the guard runs, so the caller
@@ -172,9 +193,10 @@ A false positive gets its argument written down and an inline suppression carryi
 reason — never a rule switched off project-wide. One suppression explains one line; a
 disabled rule silently covers every line you have not read.
 
-**Done when:** every finding carries a category and a bucket; every P1 and P2 also carries
-its one-sentence consequence, a fix diff, and an autofix yes or no; and every false
-positive carries its written argument.
+**Done when:** every finding carries a category, and a bucket unless it is security; every
+security finding is listed with its rule, file, line, and tool; every P1 and P2 also carries
+its one-sentence consequence, a fix diff, and an autofix yes or no; and every false positive
+carries its written argument.
 
 ## 6. Work out the baseline
 
@@ -331,13 +353,13 @@ Modules cleared: `src/domain/refunds` 96 → 4. Did not move: `src/http`, 88.
 | Category | P1 | P2 | P3 | Total | Autofixable |
 | --- | --- | --- | --- | --- | --- |
 | 🐛 Bug | 14 | 0 | 0 | 14 | 2 |
-| 🔒 Security | 3 | 0 | 0 | 3 | 0 |
 | ⚠️ Correctness risk | 1 | 60 | 0 | 61 | 18 |
 | 🧹 Maintainability | 0 | 9 | 119 | 128 | 31 |
 | 🎨 Style | 0 | 0 | 324 | 324 | 324 |
-| **Total** | **18** | **69** | **443** | **530** | **375** |
+| **Total** | **15** | **69** | **443** | **527** | **375** |
 
-375 of 530 fix themselves. The 155 left need a person.
+375 of 527 fix themselves. The 152 left need a person. Three security findings sit outside
+this table, below.
 
 ## By tool
 
@@ -388,10 +410,22 @@ Showing the 20 worst of 46 files with a finding.
 + const remaining = order.total - alreadyRefunded
 ```
 
-### 2. `src/http/session.ts:18` — 🔒 security
+### 2. `src/http/refund.ts:88` — 🐛 bug
 
-Same table, and the **Outcome** row carries what blocks it: `🔴 open — rotate the key
-first; removing it from the source leaves it in git history, so treat it as leaked`.
+Same table, one row per line: the rule, the churn, the consequence, the autofix flag, the
+outcome, and the diff beneath it.
+
+---
+
+## 🔒 Security findings — passed on
+
+Raised by rules already in the project's config. Unranked and unfixed here: weighing these
+needs the dependency tree, the git history, and a live target.
+
+| File · line | Rule | Tool | What it says |
+| --- | --- | --- | --- |
+| `src/http/session.ts:18` | `no-hardcoded-credentials` | ESLint | a signing key literal in the source |
+| `src/db/report.ts:41` | `sql-injection` | Semgrep | a query built by interpolation |
 
 ---
 

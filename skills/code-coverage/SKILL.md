@@ -12,9 +12,6 @@ worthless; the ranked list of **gaps** underneath it is what is worth having. Th
 ends with that list written down, each gap carrying the behaviour nobody tests and a
 concrete test to add.
 
-To find out whether the *covered* lines are actually checked, use
-[`mutation-test`](../mutation-test/SKILL.md). This skill answers the easier half.
-
 ## This skill reports
 
 Steps 1 to 7 measure, rank, and write up. The tests stay exactly as they are and the step
@@ -51,6 +48,21 @@ Prefer the tool the project already has. Otherwise:
 | Swift | `swift test --enable-code-coverage` with `llvm-cov` |
 | Elixir | ExCoveralls |
 
+### Nothing installed?
+
+Look before you install: the manifest and its lockfile, the CI workflows, the project's own
+config files, and the binary on `PATH`. A tool declared in the manifest but missing from the
+environment needs the project's own install command, not a new dependency.
+
+Where the project genuinely has none, put the setup to the user in one message — the tool and
+why it fits this project, the exact install command, the config file with its contents, the
+command this skill will then run, and what it costs in download size and first-run time — and
+wait for the go-ahead. A new dependency changes the manifest and the lockfile, which is the
+user's call. Then install exactly that, leave the config in the repo, and commit nothing.
+
+Coverage arrives two ways: some runners need only a flag, others need a provider package as
+well. Check which before proposing anything.
+
 Read the tool's own docs for current flags — names drift between versions, and a config
 written from memory fails in ways that look like broken code.
 
@@ -74,9 +86,9 @@ as untested.
 
 Leave the config file in the repo, so the next run and CI use the same settings.
 
-**Done when:** a coverage run completes over the whole scope, branch data is in the output,
-the machine-readable file exists on disk, and every exclusion is written down with a
-reason.
+**Done when:** the tool was already present or the user approved its setup, a coverage run
+completes over the whole scope, branch data is in the output, the machine-readable file
+exists on disk, and every exclusion is written down with a reason.
 
 ## 3. Read the numbers
 
