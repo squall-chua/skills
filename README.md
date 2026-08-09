@@ -8,7 +8,23 @@ This repo is where I keep the agent skills I use in my own workflow. Each skill 
 
 ## 🗂️ Available skills
 
-### 🏗️ [`system-design-architect`](skills/system-design-architect/SKILL.md)
+A quick map — each category is a folder under [`skills/`](skills/).
+
+| Category | Skills |
+| --- | --- |
+| [🏗️ Design](#-design) | `system-design-architect`, `architecture-review` |
+| [💻 Language](#-language) | `golang` |
+| [✍️ Writing](#-writing) | `oldman` |
+| [🥒 BDD](#-bdd) 🧪 | `to-bdd`, `wire-bdd`, `run-bdd`, `sync-bdd` |
+| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `static-analysis`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
+
+🧪 marks a skill that is still experimental — read the note at the top of its category before you trust its output.
+
+### 🏗️ Design
+
+Skills that shape a system before and after it is built.
+
+#### 🏗️ [`system-design-architect`](skills/design/system-design-architect/SKILL.md)
 
 Guides you through producing a comprehensive system design document using an interactive, Socratic 7-step roadmap. Instead of making blind architectural assumptions, the agent proposes 2–3 viable options with trade-offs at each decision point and waits for you to choose — then compiles the final Markdown document (with Mermaid.js diagrams) once every step is settled.
 
@@ -28,40 +44,7 @@ Guides you through producing a comprehensive system design document using an int
 6. **Scalability & Performance** — caching, sharding, and optimization layers.
 7. **Reliability & Resiliency** — single points of failure and failover/redundancy design.
 
-### 🧓 [`oldman`](skills/oldman/SKILL.md)
-
-A plain-language, concise communication mode. Like a patient old man explaining to a friend: the agent keeps replies short by cutting filler and pleasantries, but uses full, simple, everyday words and correct grammar — no rare vocabulary, jargon, or slang unless truly needed. This makes answers easy to follow for an older reader or a non-native English speaker. The style also applies to what the agent writes: documents, READMEs, and commit messages.
-
-**Use it when you want to:**
-
-- Get short, clear answers without fancy or hard words.
-- Make an agent's writing readable for a non-native or non-technical audience.
-- Keep docs and commit messages plain and easy to scan.
-
-**Trigger it with:** "oldman mode", "keep it simple", "plain English", or `/oldman`. Turn it off with "stop oldman" or "normal mode".
-
-### 🐹 [`golang`](skills/golang/SKILL.md)
-
-One Go (Golang) skill that covers the whole language and its ecosystem, from code style and concurrency to testing, gRPC, databases, and CI. The main `SKILL.md` is only an index of about 100 lines, so it stays cheap to load. Each row points to a topic guide under `references/`, and the agent reads a guide only when the task calls for it. Guides can point to deeper files of their own, so detail loads one level at a time.
-
-**Use it when you want to:**
-
-- Write, review, or debug Go code with idiomatic guidance on hand.
-- Set up a Go project: layout, linting, CI, dependency management, observability.
-- Work with a specific library — cobra, viper, testify, gqlgen, swaggo, wire, dig, fx, or the samber packages.
-
-**What it covers — 45 topic guides, grouped by:**
-
-1. **Writing everyday Go** — style, naming, docs, structs and interfaces, patterns, data structures, errors, context, concurrency, safety, modernizing, refactoring.
-2. **Testing and measuring** — testing, testify, benchmarks, performance, troubleshooting, gopls.
-3. **Building services and tools** — project layout, CLI, cobra, viper, databases, gRPC, GraphQL, Swagger, observability, security.
-4. **Dependency injection** — the general guide plus google/wire, uber-go/dig, uber-go/fx, and samber/do.
-5. **Toolchain and upkeep** — lint, CI, dependency management, library choices, pkg.go.dev lookups, staying updated.
-6. **samber libraries** — lo, mo, oops, hot, ro, and slog.
-
-**Credit:** the topic guides come from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber), MIT licensed. This version merges those 46 separate skills into one skill with an index, so only the relevant parts load. All credit for the Go content belongs to the original authors.
-
-### 🗺️ [`architecture-review`](skills/architecture-review/SKILL.md)
+#### 🗺️ [`architecture-review`](skills/design/architecture-review/SKILL.md)
 
 Reads the architecture behind a change and writes it up. Point it at a branch, a GitHub PR, a GitLab MR, a Gerrit CL, a commit range, a folder, or the whole repo. It maps the components, the arrows between them, the stores, and the outbound calls — for a change review, both before and after — then reports what changed, with Mermaid diagrams where they earn their place.
 
@@ -82,11 +65,60 @@ Ten lenses do the flagging: boundaries, direction, cycles, blast radius, ownersh
 
 ---
 
+### 💻 Language
+
+Skills for writing code in one language.
+
+#### 🐹 [`golang`](skills/language/golang/SKILL.md)
+
+One Go (Golang) skill that covers the whole language and its ecosystem, from code style and concurrency to testing, gRPC, databases, and CI. The main `SKILL.md` is only an index of about 100 lines, so it stays cheap to load. Each row points to a topic guide under `references/`, and the agent reads a guide only when the task calls for it. Guides can point to deeper files of their own, so detail loads one level at a time.
+
+**Use it when you want to:**
+
+- Write, review, or debug Go code with idiomatic guidance on hand.
+- Set up a Go project: layout, linting, CI, dependency management, observability.
+- Work with a specific library — cobra, viper, testify, gqlgen, swaggo, wire, dig, fx, or the samber packages.
+
+**What it covers — 45 topic guides, grouped by:**
+
+1. **Writing everyday Go** — style, naming, docs, structs and interfaces, patterns, data structures, errors, context, concurrency, safety, modernizing, refactoring.
+2. **Testing and measuring** — testing, testify, benchmarks, performance, troubleshooting, gopls.
+3. **Building services and tools** — project layout, CLI, cobra, viper, databases, gRPC, GraphQL, Swagger, observability, security.
+4. **Dependency injection** — the general guide plus google/wire, uber-go/dig, uber-go/fx, and samber/do.
+5. **Toolchain and upkeep** — lint, CI, dependency management, library choices, pkg.go.dev lookups, staying updated.
+6. **samber libraries** — lo, mo, oops, hot, ro, and slog.
+
+**Credit:** the topic guides come from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber), MIT licensed. This version merges those 46 separate skills into one skill with an index, so only the relevant parts load. All credit for the Go content belongs to the original authors.
+
+---
+
+### ✍️ Writing
+
+Skills that change how the agent writes, not what it builds.
+
+#### 🧓 [`oldman`](skills/writing/oldman/SKILL.md)
+
+A plain-language, concise communication mode. Like a patient old man explaining to a friend: the agent keeps replies short by cutting filler and pleasantries, but uses full, simple, everyday words and correct grammar — no rare vocabulary, jargon, or slang unless truly needed. This makes answers easy to follow for an older reader or a non-native English speaker. The style also applies to what the agent writes: documents, READMEs, and commit messages.
+
+**Use it when you want to:**
+
+- Get short, clear answers without fancy or hard words.
+- Make an agent's writing readable for a non-native or non-technical audience.
+- Keep docs and commit messages plain and easy to scan.
+
+**Trigger it with:** "oldman mode", "keep it simple", "plain English", or `/oldman`. Turn it off with "stop oldman" or "normal mode".
+
+---
+
+### 🥒 BDD
+
+Skills that turn requirements into `.feature` files and keep them honest.
+
 > ### 🧪 The BDD skills are experimental
 >
 > `to-bdd`, `wire-bdd`, `run-bdd`, and `sync-bdd` are new and still being shaped by real use. Their steps, wording, and hand-offs between each other will change. Try them, but read what they produce before you trust it, and keep your `.feature` files in version control so a bad run is one `git checkout` away from undone.
 
-### 🥒 [`to-bdd`](skills/to-bdd/SKILL.md) 🧪
+#### 🥒 [`to-bdd`](skills/bdd/to-bdd/SKILL.md) 🧪
 
 Turns requirements into domain-driven Gherkin/Cucumber `.feature` files. The agent first hunts for the requirements — in the conversation, in repo docs and PRDs, or in whichever issue tracker the project uses — and asks you where they live if it finds nothing that states a real behaviour. It then reads the project to learn its own vocabulary, so the scenarios speak the team's language instead of inventing new terms. Every scenario must end on an outcome someone can actually check; anything that cannot be made testable is reported back to you rather than guessed at.
 
@@ -97,13 +129,13 @@ Turns requirements into domain-driven Gherkin/Cucumber `.feature` files. The age
 - Keep scenarios to one behaviour each, with a single `When` and an observable `Then`.
 - Get BDD started on an undocumented codebase, where the code is the only spec there is.
 
-**Undocumented codebase?** When no requirements exist anywhere, the skill loads [`mining-from-code.md`](skills/to-bdd/mining-from-code.md) and recovers the rules from the code itself — existing tests, entry points, guards, domain types, and git history, one slice at a time. What comes back is tagged as *observed* behaviour, not spec: the code shows what the system does, and a bug nobody spots would otherwise become the official requirement. You confirm each rule as intended or wrong before the tag comes off. Rules you mark wrong stay written the way you want them, so they fail on the first run and the bug shows up as a finding.
+**Undocumented codebase?** When no requirements exist anywhere, the skill loads [`mining-from-code.md`](skills/bdd/to-bdd/mining-from-code.md) and recovers the rules from the code itself — existing tests, entry points, guards, domain types, and git history, one slice at a time. What comes back is tagged as *observed* behaviour, not spec: the code shows what the system does, and a bug nobody spots would otherwise become the official requirement. You confirm each rule as intended or wrong before the tag comes off. Rules you mark wrong stay written the way you want them, so they fail on the first run and the bug shows up as a finding.
 
 **Trigger it with:** `/to-bdd`. The skill never fires on its own — you have to call it.
 
 **Credit:** the Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and the domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v).
 
-### 🔌 [`wire-bdd`](skills/wire-bdd/SKILL.md) 🧪
+#### 🔌 [`wire-bdd`](skills/bdd/wire-bdd/SKILL.md) 🧪
 
 The middle piece between `to-bdd` and `run-bdd`: it writes the step definitions that make your `.feature` files actually runnable. The agent lists every undefined step, reads the project setup to pick the framework it already uses (`@cucumber/cucumber`, `pytest-bdd`, `behave`, `godog`, `cucumber-jvm`, `cucumber`, Reqnroll), finds the real code each step should drive, and writes thin glue that calls the system through its own doors. A step with nothing to call yet is marked pending, not faked green. It finishes by running the suite, so the report of what passes, fails, or is pending comes from real output.
 
@@ -115,7 +147,7 @@ The middle piece between `to-bdd` and `run-bdd`: it writes the step definitions 
 
 **Trigger it with:** `/wire-bdd`. Like its siblings, it never fires on its own.
 
-### 📋 [`run-bdd`](skills/run-bdd/SKILL.md) 🧪
+#### 📋 [`run-bdd`](skills/bdd/run-bdd/SKILL.md) 🧪
 
 The end of the chain: it runs the `.feature` files and writes up what happened. The agent finds the command the project already uses (`cucumber-js`, `pytest-bdd`, `behave`, `godog`, `cucumber-jvm`, SpecFlow), runs it, and backs every verdict with the captured output — a scenario with no output counts as unrun, not passed. The feature files are the spec and are never edited to make a run go green; a scenario that looks wrong is raised as a spec question, and one with no step definitions is listed as unwired and handed back to `wire-bdd`. Each run writes its own timestamped report, so the agent can say what turned red or green since the last one.
 
@@ -129,7 +161,7 @@ Each failure is sorted into a **product fix**, where the spec is right and the c
 
 **Trigger it with:** `/run-bdd`. Like its siblings, it never fires on its own.
 
-### 🔄 [`sync-bdd`](skills/sync-bdd/SKILL.md) 🧪
+#### 🔄 [`sync-bdd`](skills/bdd/sync-bdd/SKILL.md) 🧪
 
 Keeps the `.feature` files honest as requirements change. The agent reads both sides in full — the current requirements from docs, issues, or the conversation, and every scenario in the feature files — then pairs them by behaviour rather than by wording. What does not pair is sorted into **uncovered** (a requirement nothing specifies), **stale** (a scenario whose requirement moved on), and **orphaned** (a scenario with no requirement behind it). You get a drift report with counts and quoted evidence, then a proposed fix per item. Nothing is edited or deleted until you approve it.
 
@@ -141,6 +173,12 @@ Keeps the `.feature` files honest as requirements change. The agent reads both s
 
 **Trigger it with:** `/sync-bdd`. Like its siblings, it never fires on its own.
 
+---
+
+### 🧪 Quality
+
+Skills that measure code, tests, or a running system, and report what they find.
+
 > ### 🧪 The test and quality skills are experimental
 >
 > Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
@@ -149,7 +187,7 @@ Keeps the `.feature` files honest as requirements change. The agent reads both s
 >
 > `fault-injection-test` and `stress-test` put a running system in trouble on purpose. Never point either at production or shared staging without the authorization its third step asks for.
 
-### 🧬 [`mutation-test`](skills/mutation-test/SKILL.md) 🧪
+#### 🧬 [`mutation-test`](skills/quality/mutation-test/SKILL.md) 🧪
 
 Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that survives marks a behaviour nobody is testing. You get a timestamped report listing every survivor, the behaviour it exposes, and the test that would kill it. Your tests are not touched until you say go.
 
@@ -164,7 +202,7 @@ Checks the tests, not the code. The agent breaks your source on purpose, one sma
 
 **Credit:** the process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), MIT licensed.
 
-### 📊 [`code-coverage`](skills/code-coverage/SKILL.md) 🧪
+#### 📊 [`code-coverage`](skills/quality/code-coverage/SKILL.md) 🧪
 
 Runs the unit tests with coverage on and turns the number into a plan. The agent picks the tool your language uses, turns branch coverage on, and records every exclusion with a reason. Then it ranks the gaps instead of listing them — git churn crossed with what the code decides, so money, permissions, and data writes go to the top. Each gap near the top names the behaviour nobody tests and a concrete test to add. Nothing is written to your tests, your config, or CI until you say go.
 
@@ -178,9 +216,9 @@ Runs the unit tests with coverage on and turns the number into a plan. The agent
 
 **Trigger it with:** `/code-coverage`. It never fires on its own.
 
-**Its sibling:** coverage says a line ran; [`mutation-test`](skills/mutation-test/SKILL.md) says whether the line is checked. Run this one first — it is the cheaper half.
+**Its sibling:** coverage says a line ran; [`mutation-test`](skills/quality/mutation-test/SKILL.md) says whether the line is checked. Run this one first — it is the cheaper half.
 
-### 🔬 [`static-analysis`](skills/static-analysis/SKILL.md) 🧪
+#### 🔬 [`static-analysis`](skills/quality/static-analysis/SKILL.md) 🧪
 
 Reads the code without running it, over the paths you name — or over the files changed against the default branch if you name none. It runs three kinds of tool: a type checker, a linter, and a dead code finder. Then it cuts the noise. Findings are grouped by *rule*, because one rule firing 200 times is one decision and not 200 problems, then categorised and re-ranked by what the code decides. Each real finding gets one plain sentence on what goes wrong and a fix written as a diff. It works on untested code: a red suite or no suite does not stop the reading, only the fixing. Security sits outside this run — that is `security-compliance`. Nothing is changed until you say go.
 
@@ -194,7 +232,7 @@ Reads the code without running it, over the paths you name — or over the files
 
 **Trigger it with:** `/static-analysis`. It never fires on its own.
 
-### 🤝 [`contract-test`](skills/contract-test/SKILL.md) 🧪
+#### 🤝 [`contract-test`](skills/quality/contract-test/SKILL.md) 🧪
 
 Tests a running API against its own contract, from the outside. The source is never opened: every finding comes from a request the agent sent and the response it got back, so the report says what a real consumer hits. A gap between the promise and the behaviour is a *drift*. The agent finds the contract — published in the repo, served by the running app, or derived from the route definitions — runs a conformance tool against a target you pin, then sends by hand the promises no tool checks on its own: guards, error bodies, media types, unknown ids, pagination. Two numbers come out side by side: how much of the contract was exercised, and how much of that had no drift. Your API source is never edited.
 
@@ -212,7 +250,7 @@ Tests a running API against its own contract, from the outside. The source is ne
 
 **Its siblings:** coverage and mutation testing look inward at the code; this one stands outside the box and asks whether the API keeps its word.
 
-### 🔗 [`integration-test`](skills/integration-test/SKILL.md) 🧪
+#### 🔗 [`integration-test`](skills/quality/integration-test/SKILL.md) 🧪
 
 Writes the tests that run against your real database, broker, cache, and object store. A *seam* is where your code hands work to something it does not own. Unit tests stop at the seam and mock what is on the far side, so everything they prove is a statement about your own mock. This skill crosses it: one rule sorts the seams — run the collaborators you own in a container the suite starts itself, fake the ones you do not — and a seam left mocked in-process is reported as *unproven* rather than counted. Every test is *proven red* before it is trusted, and the suite is proven *hermetic* four ways: alone, shuffled, twice with no wipe, and in parallel. Your production code is left alone.
 
@@ -226,7 +264,7 @@ Writes the tests that run against your real database, broker, cache, and object 
 
 **Trigger it with:** `/integration-test`. It never fires on its own.
 
-### 💥 [`fault-injection-test`](skills/fault-injection-test/SKILL.md) 🧪
+#### 💥 [`fault-injection-test`](skills/quality/fault-injection-test/SKILL.md) 🧪
 
 Breaks the environment under your running system and watches what happens. First it writes down the *steady state* — the few numbers that say the system is serving people, each with the command that reads it and a tolerance band. Then it takes the dependencies down, slows them past the timeout, makes them flap, fills the disk, kills a container mid-request, and partitions the network, one fault at a time, with a hypothesis written before each run. The blast radius, the abort condition, and the kill switch are all fixed first, and the kill switch is tested while nothing is wrong. Two things come out: how many experiments held their steady state, and whether it came back afterwards. Your production code is not touched until you say go.
 
@@ -245,7 +283,7 @@ Ask it to fix things and it adds one mechanism at a time — a timeout, backoff 
 
 **Needs:** a running system under a realistic load, and a container runtime for the injector. Production or shared staging needs recorded authorization first.
 
-### 📈 [`stress-test`](skills/stress-test/SKILL.md) 🧪
+#### 📈 [`stress-test`](skills/quality/stress-test/SKILL.md) 🧪
 
 Raises the load until your system stops keeping up, and finds the *knee* — the point where throughput stops rising and latency starts climbing. Below it, more load means more work done; above it, more load means only more waiting. Then it names what gave first: the connection pool, one pinned core, garbage collection, a query without an index. A knee with no cause named is a number nobody can act on. The figure it leads with is **headroom** — the knee divided by the peak you actually have to serve, which is the one number someone outside the team can use.
 
@@ -264,7 +302,7 @@ It is strict about one thing above all. A load generator that waits for each res
 
 **Needs:** a running instance and a load generator. Shared staging or production needs recorded authorization first, and third parties are stubbed by default.
 
-### ♿ [`visual-accessibility`](skills/visual-accessibility/SKILL.md) 🧪
+#### ♿ [`visual-accessibility`](skills/quality/visual-accessibility/SKILL.md) 🧪
 
 Drives your running UI in a real browser and checks it against WCAG. A rules engine sees about a third of WCAG, and it is not the third that stops people — so the agent runs whichever engine your project already has (axe, Pa11y, Lighthouse, jest-axe), then drives the rest by hand with the [`vibium`](https://github.com/vibium/vibium) browser CLI: tab order, focus visibility, keyboard traps, reflow at 320px, reduced motion, forced colours, live regions. Findings are ranked by *barrier* — what a person cannot do because of it — so a keyboard trap in checkout outranks a contrast miss on a footer link. Every finding carries the command that reproduces it and a screenshot. Your UI source is left alone.
 
@@ -281,7 +319,7 @@ Drives your running UI in a real browser and checks it against WCAG. A rules eng
 
 **Needs:** a running instance and the `vibium` CLI. No test suite required.
 
-### 🫠 [`visual-slop`](skills/visual-slop/SKILL.md) 🧪
+#### 🫠 [`visual-slop`](skills/quality/visual-slop/SKILL.md) 🧪
 
 Checks your running UI against the [pols.dev anti-slop design law](https://pols.dev/slop.md) — about 150 named *tells* of a generated interface, fetched fresh each run and walked heading by heading, so the review is against the law rather than against the agent's taste. Findings are ranked by what they *stack* with: one pill is a choice, but an icon tile plus a category pill plus tag chips plus a hairline border plus a glowy button in one card is the clearest slop signature there is. Because the law's own deepest point is that dodging the list is still slop, every finding carries the replacement rather than just the removal, and the page gets one verdict on whether it has a signature at all. Nothing is changed until you say go.
 
@@ -300,7 +338,7 @@ Ask it to fix things and it builds the *signature first*, before removing a sing
 
 **Needs:** a running instance, the `vibium` CLI, and network access to fetch the law.
 
-### 🛡️ [`security-compliance`](skills/security-compliance/SKILL.md) 🧪
+#### 🛡️ [`security-compliance`](skills/quality/security-compliance/SKILL.md) 🧪
 
 Scans the code, its dependencies, its full git history, and the running app, then sorts the findings by the only fact that decides which one matters: *reach*. A CVSS 9.8 in a build-time dependency reaches nobody; a 5.3 on an unauthenticated route reaches everybody, and it is the one that gets used. So every finding carries a path — entry point, route through the code, sink — or a written argument for why no path exists. What scanners are useless at, the agent reads by hand: IDOR, missing route authorization, tenant isolation, SSRF, business logic, crypto misuse, and what leaks into logs. DAST runs only with authorization recorded first — approver, staging target, hosts, window, and rate limit. Secret values and captured PII stay out of the report.
 
@@ -315,7 +353,7 @@ Scans the code, its dependencies, its full git history, and the running app, the
 
 **Trigger it with:** `/security-compliance`. It never fires on its own.
 
-### 🧭 [`code-quality`](skills/code-quality/SKILL.md) 🧪
+#### 🧭 [`code-quality`](skills/quality/code-quality/SKILL.md) 🧪
 
 The front door to all ten dimensions, and the skill that reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest report of each kind from every `.reports/` folder, checks each is still fresh enough to believe, cross-reads them, and gives one graded verdict. The verdict is a floor, not an average, and a report that is missing, skipped, or stale counts as *unproven* rather than as a pass.
 
@@ -372,7 +410,7 @@ The easiest way is the [Vercel `skills` CLI](https://github.com/vercel-labs/skil
 # pick skills and target agents interactively
 npx skills add squall-chua/skills
 
-# one skill, user-level
+# one skill, user-level — name the skill, not its folder path
 npx skills add squall-chua/skills -g -s golang
 
 # everything, no prompts
@@ -383,11 +421,13 @@ Skills are harness-agnostic, so a plain copy works too:
 
 ```bash
 # Claude Code (user-level)
-cp -r skills/system-design-architect ~/.claude/skills/
+cp -r skills/design/system-design-architect ~/.claude/skills/
 
 # or project-level
-cp -r skills/system-design-architect .claude/skills/
+cp -r skills/design/system-design-architect .claude/skills/
 ```
+
+The category folders are for reading the repo, not for the agent. Copy the skill folder itself — the one holding `SKILL.md` — straight into your skills directory. The `skills` CLI does this for you.
 
 The `skills` CLI does not handle agents — it only looks for `SKILL.md` files. Agents are single files, so copy the ones you want:
 
