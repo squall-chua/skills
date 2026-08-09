@@ -61,6 +61,25 @@ One Go (Golang) skill that covers the whole language and its ecosystem, from cod
 
 **Credit:** the topic guides come from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber), MIT licensed. This version merges those 46 separate skills into one skill with an index, so only the relevant parts load. All credit for the Go content belongs to the original authors.
 
+### 🗺️ [`architecture-review`](skills/architecture-review/SKILL.md)
+
+Reads the architecture behind a change and writes it up. Point it at a branch, a GitHub PR, a GitLab MR, a Gerrit CL, a commit range, a folder, or the whole repo. It maps the components, the arrows between them, the stores, and the outbound calls — for a change review, both before and after — then reports what changed, with Mermaid diagrams where they earn their place.
+
+The core of it is two intentions. The **stated** one is what the author said the change is for, quoted from the PR body, the issue, and the commit messages. The **built** one is what the code now makes cheap and what it makes expensive. The gap between them is **drift**, and the report names each kind: promised but unbuilt, built but unstated, over-built, under-built, or put in the wrong component. Where the author stated nothing at all, that is recorded as a finding rather than filled in from the diff — reading intent off the diff makes drift impossible to see.
+
+**Use it when you want to:**
+
+- Understand the shape of a change before reviewing it line by line.
+- Check that what a PR does matches what its description says it does.
+- Get architecture documentation, with diagrams, for a codebase nobody has written up.
+- Find the boundaries, cycles, and missing seams that a line-by-line review walks straight past.
+- Know the blast radius of a changed shared interface before it ships.
+- Get a concrete proposal per problem — the move, the cost, and when to do it — sized against the change rather than three times bigger.
+
+Ten lenses do the flagging: boundaries, direction, cycles, blast radius, ownership of state, seams, failure, coupling in time, evolution, and consistency. Findings are bucketed P1, P2, P3, each with the cost of leaving it and who pays. The report also names what held up, so the next person knows which pattern to copy, and closes with what the review did not read.
+
+**Trigger it with:** `/architecture-review`. It never fires on its own, and it changes no code — the report is the whole deliverable.
+
 ---
 
 > ### 🧪 The BDD skills are experimental
