@@ -16,7 +16,7 @@ A quick map — each category is a folder under [`skills/`](skills/).
 | [💻 Language](#-language) | `golang` |
 | [✍️ Writing](#-writing) | `oldman` |
 | [🥒 BDD](#-bdd) 🧪 | `to-bdd`, `wire-bdd`, `run-bdd`, `sync-bdd` |
-| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `crap-test`, `static-analysis`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
+| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
 
 🧪 marks a skill that is still experimental — read the note at the top of its category before you trust its output.
 
@@ -181,7 +181,7 @@ Skills that measure code, tests, or a running system, and report what they find.
 
 > ### 🧪 The test and quality skills are experimental
 >
-> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
+> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
 >
 > Three habits make them safe to try. Run them on a branch, so a bad run is one `git checkout` away from undone. Read the report before you trust the number — each says plainly what it did not measure, and that part matters more than the score. And check anything a fix run writes: a test written to kill a mutant can still be a poor test, and a fix that closes one finding can open another.
 >
@@ -233,6 +233,24 @@ Scores every function with the CRAP metric — `complexity² × (1 − coverage)
 **Trigger it with:** `/crap-test`. It never fires on its own.
 
 **Its siblings:** it reuses what [`code-coverage`](skills/quality/code-coverage/SKILL.md) and [`static-analysis`](skills/quality/static-analysis/SKILL.md) measure separately, and crosses them. Coverage ranks gaps by risk, which is a judgement; this one ranks by arithmetic. Run both — they disagree usefully.
+
+#### 🧬 [`dry-test`](skills/quality/dry-test/SKILL.md) 🧪
+
+Finds functions that share a *shape*, in fourteen languages, and then refuses to call that a DRY violation on its own. It ships its own engine: [`dry.py`](skills/quality/dry-test/scripts/dry.py) is a port of Robert C. Martin's [dry4go](https://github.com/unclebob/dry4go) onto tree-sitter grammars — each function's syntax tree becomes a set of subtree fingerprints with names and literal values stripped, and two functions are scored by Jaccard similarity over those sets. Clones are grouped into families, and each family is crossed with a second measurement: how often git says those files were edited *together*. Shape says they look alike; co-change says whether they have ever moved as one. The report ends with the one question a machine cannot answer — does the same sentence describe what every member knows?
+
+**Use it when you want to:**
+
+- Find copy-paste across a codebase in Python, Go, JavaScript, TypeScript, TSX, Java, Kotlin, Swift, C#, PHP, Ruby, Rust, C, or C++.
+- See clone *families* rather than a list of pairs — three copies are one problem, not three.
+- Tell real duplication from code that only rhymes, using history instead of taste.
+- Get a proposal per family, and a recorded reason for the ones that should stay as they are.
+- Gate CI on new duplication in changed files.
+
+**Trigger it with:** `/dry-test`. It never fires on its own, and it changes no code until you name the families to merge.
+
+**Why you can trust the number:** four self-checks run against your own code before any score prints — rename every identifier (must not move the score), flip an operator (must move it), add an escape inside a string (must not), and find any unit at all. Each was verified by breaking the script on purpose. The same four also run against a committed fixture in **each of the fourteen languages** ([`check_fixtures.py`](skills/quality/dry-test/scripts/check_fixtures.py)), alongside two more: one rewrites every literal value and requires the fingerprints not to move (dry4go's normaliser rule asserted directly), the other flips an operator *inside* a string interpolation and requires that it does move, because interpolated code is not spelling. All **29 `UNITS` entries across the 14 languages** are reached by a fixture, and the expected set is stated in the runner rather than read from `dry.py`, so deleting a table entry fails the suite instead of quietly satisfying it. That suite caught two real faults on its first run, in Swift and PHP. On Go's `net/http` the port returns **100% of dry4go's 150 findings**, and its exact prefilters were confirmed to give byte-identical results to brute force on two corpora, 9,061 units in 7 seconds.
+
+**Credit:** the algorithm — normalised syntax trees, subtree fingerprints, Jaccard similarity, and the `--min-lines` / `--min-nodes` floors — is [Robert C. Martin's](https://github.com/unclebob), from [`dry4go`](https://github.com/unclebob/dry4go). `dry.py` is an independent implementation of it over tree-sitter; no dry4go source is bundled here.
 
 #### 🔬 [`static-analysis`](skills/quality/static-analysis/SKILL.md) 🧪
 
@@ -469,7 +487,8 @@ Once installed, trigger a skill with natural language that matches its purpose �
 - The `golang` skill repackages [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber) and its contributors. The Go guidance is their work; this repo only merged it into one skill with an on-demand index.
 - The `to-bdd` skill's Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and its domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v), which is MIT licensed. The rules are theirs; this repo restated them as a step-by-step skill.
 - The `mutation-test` skill's process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), which is MIT licensed. The mutation-testing loop is theirs; this repo added the triage buckets, the score formula, and the report.
-- The `code-coverage`, `static-analysis`, `code-quality`, and `crap-test` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
+- The `dry-test` skill's engine implements the algorithm of [`dry4go`](https://github.com/unclebob/dry4go) by [Robert C. Martin](https://github.com/unclebob) — normalised syntax trees, one fingerprint per subtree, Jaccard similarity, and the `--min-lines` / `--min-nodes` floors. The algorithm is his; [`dry.py`](skills/quality/dry-test/scripts/dry.py) is an independent implementation of it over tree-sitter grammars so it runs on fourteen languages, and no dry4go source is bundled here.
+- The `code-coverage`, `static-analysis`, `code-quality`, `crap-test`, and `dry-test` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
 
 ---
 
