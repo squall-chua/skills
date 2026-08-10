@@ -16,7 +16,7 @@ A quick map — each category is a folder under [`skills/`](skills/).
 | [💻 Language](#-language) | `golang` |
 | [✍️ Writing](#-writing) | `oldman` |
 | [🥒 BDD](#-bdd) 🧪 | `to-bdd`, `wire-bdd`, `run-bdd`, `sync-bdd` |
-| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `static-analysis`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
+| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `crap-test`, `static-analysis`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
 
 🧪 marks a skill that is still experimental — read the note at the top of its category before you trust its output.
 
@@ -181,7 +181,7 @@ Skills that measure code, tests, or a running system, and report what they find.
 
 > ### 🧪 The test and quality skills are experimental
 >
-> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
+> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
 >
 > Three habits make them safe to try. Run them on a branch, so a bad run is one `git checkout` away from undone. Read the report before you trust the number — each says plainly what it did not measure, and that part matters more than the score. And check anything a fix run writes: a test written to kill a mutant can still be a poor test, and a fix that closes one finding can open another.
 >
@@ -217,6 +217,22 @@ Runs the unit tests with coverage on and turns the number into a plan. The agent
 **Trigger it with:** `/code-coverage`. It never fires on its own.
 
 **Its sibling:** coverage says a line ran; [`mutation-test`](skills/quality/mutation-test/SKILL.md) says whether the line is checked. Run this one first — it is the cheaper half.
+
+#### 💩 [`crap-test`](skills/quality/crap-test/SKILL.md) 🧪
+
+Scores every function with the CRAP metric — `complexity² × (1 − coverage)³ + complexity` — so complex code and untested code are read as one number instead of two. The run is a replay: the agent writes one stdlib-only script, proves it against twelve fixed vectors before it touches your repo, then joins a complexity file to a coverage file and prints a CSV. The script, both inputs, and the CSV are saved beside the report, so anyone can re-run it and get the same table. The order is the score and nothing else. Nothing is written to your tests or your source until you say go.
+
+**Use it when you want to:**
+
+- Find the functions that are both hard to follow and barely tested, ranked by one number.
+- Get an exact coverage target per function — "34%, needs 50.0%" instead of "add more tests".
+- Know which functions no test can save: complexity 31 or more fails even at 100% coverage.
+- Have the tests written and the big functions split, once you have read the report and said go.
+- Gate CI on the count of functions over 30, as a ceiling that can only fall.
+
+**Trigger it with:** `/crap-test`. It never fires on its own.
+
+**Its siblings:** it reuses what [`code-coverage`](skills/quality/code-coverage/SKILL.md) and [`static-analysis`](skills/quality/static-analysis/SKILL.md) measure separately, and crosses them. Coverage ranks gaps by risk, which is a judgement; this one ranks by arithmetic. Run both — they disagree usefully.
 
 #### 🔬 [`static-analysis`](skills/quality/static-analysis/SKILL.md) 🧪
 
@@ -453,7 +469,7 @@ Once installed, trigger a skill with natural language that matches its purpose �
 - The `golang` skill repackages [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) by [Samuel Berthe](https://github.com/samber) and its contributors. The Go guidance is their work; this repo only merged it into one skill with an on-demand index.
 - The `to-bdd` skill's Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and its domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v), which is MIT licensed. The rules are theirs; this repo restated them as a step-by-step skill.
 - The `mutation-test` skill's process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), which is MIT licensed. The mutation-testing loop is theirs; this repo added the triage buckets, the score formula, and the report.
-- The `code-coverage`, `static-analysis`, and `code-quality` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
+- The `code-coverage`, `static-analysis`, `code-quality`, and `crap-test` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
 
 ---
 
