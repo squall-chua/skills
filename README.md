@@ -389,14 +389,14 @@ Scans the code, its dependencies, its full git history, and the running app, the
 
 #### 🧭 [`code-quality`](skills/quality/code-quality/SKILL.md) 🧪
 
-The front door to all ten dimensions, and the skill that reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest report of each kind from every `.reports/` folder, checks each is still fresh enough to believe, cross-reads them, and gives one graded verdict. The verdict is a floor, not an average, and a report that is missing, skipped, or stale counts as *unproven* rather than as a pass.
+The front door to all twelve dimensions, and the skill that reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest report of each kind from every `.reports/` folder, checks each is still fresh enough to believe, cross-reads them, and gives one graded verdict. The verdict is a floor, not an average, and a report that is missing, skipped, or stale counts as *unproven* rather than as a pass.
 
-Called on a repo with no reports at all, it works out which of the ten dimensions that project should cover, which do not apply, and which are a practice the team may take or leave — then hands over the command for each, in the order worth doing them. It is equally careful about what your question can answer: the ten split into three families by what each is measured against — the code, the test suite, or a running system — so asking about one module marks four of them **out of scope** rather than unproven, because unproven reads as work somebody skipped and this is work nobody could have done at the scope you gave.
+Called on a repo with no reports at all, it works out which of the twelve dimensions that project should cover, which do not apply, and which are a practice the team may take or leave — then hands over **one** command — the cheapest thing you can run today — and keeps the rest of the list in the report. Finish that one, call it again, and it names the next. It asks only about dimensions whose precondition is already met, so a repo with no tests is never asked to weigh mutation testing. It is equally careful about what your question can answer: the twelve split into three families by what each is measured against — the code, the test suite, or a running system — so asking about one module marks four of them **out of scope** rather than unproven, because unproven reads as work somebody skipped and this is work nobody could have done at the scope you gave.
 
 **Use it when you want to:**
 
 - A starting point when you have run none of these skills and want to know which ones your project needs.
-- One verdict on the code's health instead of ten reports to reconcile.
+- One verdict on the code's health instead of twelve reports to reconcile.
 - To know whether a coverage number means anything, judged against the other signals.
 - A release readiness check that says plainly what it does not know, and what your scope could never have told it.
 - An ordered list of what to fix first, drawn from every report at once.
