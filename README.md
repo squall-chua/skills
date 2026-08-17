@@ -16,7 +16,7 @@ A quick map — each category is a folder under [`skills/`](skills/).
 | [💻 Language](#-language) | `golang` |
 | [✍️ Writing](#-writing) | `oldman` |
 | [🥒 BDD](#-bdd) 🧪 | `to-bdd`, `wire-bdd`, `run-bdd`, `sync-bdd` |
-| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
+| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `clean-code`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
 
 🧪 marks a skill that is still experimental — read the note at the top of its category before you trust its output.
 
@@ -181,7 +181,7 @@ Skills that measure code, tests, or a running system, and report what they find.
 
 > ### 🧪 The test and quality skills are experimental
 >
-> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
+> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `clean-code`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
 >
 > Three habits make them safe to try. Run them on a branch, so a bad run is one `git checkout` away from undone. Read the report before you trust the number — each says plainly what it did not measure, and that part matters more than the score. And check anything a fix run writes: a test written to kill a mutant can still be a poor test, and a fix that closes one finding can open another.
 >
@@ -265,6 +265,22 @@ Reads the code without running it, over the paths you name — or over the files
 - Have the fixes applied and proven, once you have read the report and said go.
 
 **Trigger it with:** `/static-analysis`. It never fires on its own.
+
+#### 🧼 [`clean-code`](skills/quality/clean-code/SKILL.md) 🧪
+
+Reads the code the way a person does, against the clean code rules — fifty-six of them in nine groups, from names and functions through comments, structure, objects and tests. This is the half no linter reaches: a tool can prove a function is 80 lines long, but only a reader can say it does two things, that a name lies about what it holds, or that a comment repeats the line beneath it. The risk is the mirror of a linter's, so the skill's spine is the cut: a rule broken that causes no **smell** — rigidity, fragility, immobility, needless complexity, needless repetition, opacity — is taste, and taste is counted and dropped rather than reported. The project's own conventions beat the rule list, and anything a formatter, a linter, or a sibling skill already owns is struck off before the reading starts. Every fix keeps the behaviour; a fix that needs the behaviour to change becomes a bug report instead.
+
+**Use it when you want to:**
+
+- Get the readability findings a linter cannot produce, over the folders you name.
+- See each one ranked by the smell it causes, not by how much it offends a rule.
+- Read one plain sentence on what the next person pays for it, with a fix diff.
+- Know how many breaks were dropped as taste, so the silence is accounted for.
+- Have the fixes applied and proven against the suite, once you have read the report and said go.
+
+**Trigger it with:** `/clean-code`. It never fires on its own.
+
+**Credit:** the rules are [Robert C. Martin's](https://github.com/unclebob), from *Clean Code*, by way of [Wojtek Lukaszuk's summary](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29). What the skill adds is the reading procedure, the smell ranking, and the report.
 
 #### 🤝 [`contract-test`](skills/quality/contract-test/SKILL.md) 🧪
 
