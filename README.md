@@ -207,13 +207,13 @@ Every skill below writes a timestamped report into `.reports/`. A front door rea
 ```
 Quality
 │
-├── /code-quality ................ development — the code and its suite
-│   ├── code-coverage ........... how much of the code runs under test
-│   ├── mutation-test ........... would the tests catch a bug, or run past it
-│   ├── crap-test ............... which functions are dangerous to edit
-│   ├── static-analysis ......... what is wrong with the code as written
-│   ├── dry-test ................ is one piece of knowledge in several places
-│   ├── clean-code .............. can the next person read it and change it
+├── /code-quality ..................... development — the code and its suite
+│   ├── code-coverage ................. how much of the code runs under test
+│   ├── mutation-test ................. would the tests catch a bug, or run past it
+│   ├── crap-test ..................... which functions are dangerous to edit
+│   ├── static-analysis ............... what is wrong with the code as written
+│   ├── dry-test ...................... is one piece of knowledge in several places
+│   ├── clean-code .................... can the next person read it and change it
 │   └── to-bdd → wire-bdd → run-bdd ... does the written spec hold
 │
 ├── /release-quality ............ release — the running system
