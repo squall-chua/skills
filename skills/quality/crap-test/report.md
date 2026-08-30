@@ -11,13 +11,18 @@ columns are what transfers. Each is shown with a row or two; a real report lists
 | **Run** | <YYYY-MM-DD HH:MM:SS> |
 | **Formula** | `comp² × (1 − cov)³ + comp`, threshold 30 |
 | **Complexity** | `eslint --rule '{"complexity":["warn",0]}' -f json` → `complexity.json` |
-| **Coverage** | `vitest --coverage.reporter=json` → `coverage-final.json` |
+| **Coverage** | `vitest --coverage.reporter=json` → `coverage-final.json` — generated here; no fresh `/code-coverage` file in `.reports/` |
 | **Script** | [`crap-2026-08-09-142233.py`](./crap-2026-08-09-142233.py) — 12/12 vectors passed |
 | **Data** | [`crap-2026-08-09-142233.csv`](./crap-2026-08-09-142233.csv) |
 | **Commit** | `a1b2c3d` (dirty working tree) |
 | **Scope** | `src/**` — 84 files, 6 excluded |
 | **Suite** | 412 passed, 0 failed, 3 skipped |
 | **Before** | [`crap-report-2026-08-09-091412.md`](./crap-report-2026-08-09-091412.md) |
+
+Where step 2 reused a coverage file `/code-coverage` had already written, the **Coverage** row
+says so instead, and links it where it lies under its own earlier timestamp:
+
+| **Coverage** | reused [`coverage-2026-08-09-141005.json`](./coverage-2026-08-09-141005.json), same commit — not re-run |
 
 ## What moved
 
