@@ -80,6 +80,29 @@ Some tools ship the metric already — PHPUnit's Clover XML carries `crap`, `com
 `coverage` per `<method>`, as does any Clover-format report. Take a published value; never
 recompute one.
 
+**Look in the report folder before you generate the coverage half.** `/code-coverage` leaves
+its machine-readable file there under its own timestamp — `coverage-<timestamp>.lcov`,
+`.info`, `.out`, `.xml`, `.json`.
+
+The data file carries no commit of its own. Its commit is in the header of the
+`coverage-report-<timestamp>.md` that shares its timestamp — that shared timestamp is the only
+thing pairing the two, so read the report to find the commit, and treat a data file with no
+matching report as unusable rather than guessing its age. Then check it is still evidence
+against the commit from step 1:
+
+```sh
+git diff --stat <the coverage report's commit>..HEAD -- <scope>
+```
+
+Same commit, or no file in scope changed since — reuse it, and say so in the report header
+beside the file and its date. Anything in scope changed since, or the commit is unknown to
+this repo — generate a fresh one and say that instead. Re-running a whole suite with coverage
+on to rebuild a file that already exists is the most expensive mistake available in this
+skill, and on a large suite it is the expensive half of both runs done twice.
+
+Reuse decides only where the numbers come from. The reconciliation in step 5 runs the same
+either way, because a reused file can still miss functions the complexity file has.
+
 Otherwise both inputs must be per function. **Complexity** needs a name, file, start line, end
 line, and cyclomatic number. **Coverage** needs per-line or per-region hits, or per-method
 counters. Read [`joins.md`](joins.md) for the command, the field, and the join key per
@@ -93,8 +116,9 @@ download size to the user in one message and wait.
 Write down every exclusion and its reason — test files, generated code, vendored code,
 migrations. An exclusion nobody can justify moves the score and hides a function.
 
-**Done when:** both files exist in the report folder covering the whole scope, and every
-exclusion is written down with its reason.
+**Done when:** both files exist in the report folder covering the whole scope, the coverage
+file is recorded as reused or generated with the reason, and every exclusion is written down
+with its reason.
 
 ## 3. Write the script
 
@@ -182,7 +206,10 @@ Write to `crap-report-<timestamp>.md` in the step 1 report folder — one file p
 overwriting an older one.
 
 The script, both inputs, and the CSV are already in that folder from steps 2 and 3; give them
-the same timestamp, and name all four in the report. Use the tables in [`report.md`](report.md) — every section of that shape, in
+the same timestamp, and name all four in the report. A coverage file **reused** from
+`/code-coverage` keeps its own earlier timestamp — do not copy or rename it. Link it where it
+lies and say it was reused, so a reader can see the two runs shared one measurement rather
+than disagreeing about one. Use the tables in [`report.md`](report.md) — every section of that shape, in
 that order. Then tell the user the path, the count over 30, the worst
 function with its score, and whether it needs tests or splitting.
 

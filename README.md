@@ -16,7 +16,10 @@ A quick map — each category is a folder under [`skills/`](skills/).
 | [💻 Language](#-language) | `golang` |
 | [✍️ Writing](#-writing) | `oldman` |
 | [🥒 BDD](#-bdd) 🧪 | `to-bdd`, `wire-bdd`, `run-bdd`, `sync-bdd` |
-| [🧪 Quality](#-quality) 🧪 | `code-quality`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `clean-code`, `mutation-test`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance` |
+| [🧪 Quality](#-quality) 🧪 | Three front doors over the skills that measure — see [the hierarchy](#-how-these-fit-together) |
+| &nbsp;&nbsp;└ [🔧 Development](#-development--kept-green-on-a-branch) 🧪 | **`code-quality`** reads `code-coverage`, `mutation-test`, `crap-test`, `static-analysis`, `dry-test`, `clean-code`, and the BDD four |
+| &nbsp;&nbsp;└ [🚦 Release](#-release--run-at-the-gate) 🧪 | **`release-quality`** reads `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `security-compliance` |
+| &nbsp;&nbsp;└ [🎨 Visual](#-visual--run-against-a-rendered-page) 🧪 | **`visual-quality`** reads `visual-accessibility`, `visual-slop` |
 
 🧪 marks a skill that is still experimental — read the note at the top of its category before you trust its output.
 
@@ -114,6 +117,8 @@ A plain-language, concise communication mode. Like a patient old man explaining 
 
 Skills that turn requirements into `.feature` files and keep them honest.
 
+Between them they fill **specified behaviour**, one of the seven dimensions the [🔧 Development](#-development--kept-green-on-a-branch) front door [`code-quality`](skills/quality/code-quality/SKILL.md) reads — `run-bdd` writes the report it looks for. They sit in their own category because they are worth having on their own, whether or not you ever run a front door.
+
 > ### 🧪 The BDD skills are experimental
 >
 > `to-bdd`, `wire-bdd`, `run-bdd`, and `sync-bdd` are new and still being shaped by real use. Their steps, wording, and hand-offs between each other will change. Try them, but read what they produce before you trust it, and keep your `.feature` files in version control so a bad run is one `git checkout` away from undone.
@@ -181,28 +186,73 @@ Skills that measure code, tests, or a running system, and report what they find.
 
 > ### 🧪 The test and quality skills are experimental
 >
-> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `clean-code`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and `code-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
+> Every skill from here down is marked 🧪: `mutation-test`, `code-coverage`, `crap-test`, `dry-test`, `static-analysis`, `clean-code`, `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `visual-accessibility`, `visual-slop`, `security-compliance`, and the three front doors `code-quality`, `release-quality`, and `visual-quality`. They are new and still being shaped by real use, so their steps, thresholds, buckets, and report shapes will change.
 >
 > Three habits make them safe to try. Run them on a branch, so a bad run is one `git checkout` away from undone. Read the report before you trust the number — each says plainly what it did not measure, and that part matters more than the score. And check anything a fix run writes: a test written to kill a mutant can still be a poor test, and a fix that closes one finding can open another.
 >
 > `fault-injection-test` and `stress-test` put a running system in trouble on purpose. Never point either at production or shared staging without the authorization its third step asks for.
 
-#### 🧬 [`mutation-test`](skills/quality/mutation-test/SKILL.md) 🧪
+#### 🧭 How these fit together
 
-Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that survives marks a behaviour nobody is testing. You get a timestamped report listing every survivor, the behaviour it exposes, and the test that would kill it. Your tests are not touched until you say go.
+There are **fourteen dimensions** — fourteen questions about the code, the suite, or the running system. Thirteen skills in this category answer one each, and the fourteenth, specified behaviour, takes the three BDD skills between them. Three **front doors** sit above the lot: each reads its group's reports together, cross-reads them, and gives one graded verdict. The grouping is by **phase**, because the fourteen do not all belong at the same moment.
+
+| Phase | Front door | Reads these skills | Needs |
+| --- | --- | --- | --- |
+| 🔧 Development | [`code-quality`](skills/quality/code-quality/SKILL.md) | `code-coverage`, `mutation-test`, `crap-test`, `static-analysis`, `dry-test`, `clean-code`, and the four [🥒 BDD](#-bdd) skills | a laptop and a branch |
+| 🚦 Release | [`release-quality`](skills/quality/release-quality/SKILL.md) | `contract-test`, `integration-test`, `fault-injection-test`, `stress-test`, `security-compliance` | a running system, containers, permission to break things |
+| 🎨 Visual | [`visual-quality`](skills/quality/visual-quality/SKILL.md) | `visual-accessibility`, `visual-slop` | a page that renders in a browser |
+
+Every skill below writes a timestamped report into `.reports/`. A front door reads whichever reports it finds there — it never runs a sibling for you, because these cost real time and a couple of them touch a live system. When a report is missing it hands you the command instead.
+
+```
+Quality
+│
+├── /code-quality ................ development — the code and its suite
+│   ├── code-coverage ........... how much of the code runs under test
+│   ├── mutation-test ........... would the tests catch a bug, or run past it
+│   ├── crap-test ............... which functions are dangerous to edit
+│   ├── static-analysis ......... what is wrong with the code as written
+│   ├── dry-test ................ is one piece of knowledge in several places
+│   ├── clean-code .............. can the next person read it and change it
+│   └── to-bdd → wire-bdd → run-bdd ... does the written spec hold
+│
+├── /release-quality ............ release — the running system
+│   ├── contract-test ........... does the API keep the contract it publishes
+│   ├── integration-test ........ does it work against a real database
+│   ├── fault-injection-test .... does it survive that database failing
+│   ├── stress-test ............. how much load before it stops keeping up
+│   └── security-compliance ..... what can an attacker reach
+│
+└── /visual-quality ............. visual — the rendered interface
+    ├── visual-accessibility .... can everyone operate it
+    └── visual-slop ............. did anybody decide anything
+```
+
+Three rules hold in all three front doors. **The verdict is a floor, not an average** — sound on six dimensions and fragile on the seventh is fragile. **Absent evidence is never good news** — missing, skipped, and stale all read as *unproven*, never as a pass. And **relevance comes before measurement** — a JSON API is told it has no interface to grade, rather than graded ⚫ Unproven on accessibility.
+
+The three are independent. Nothing merges them, and each names the other two at the end of its report so a green verdict in one phase is never mistaken for a whole-system pass.
+
+#### 🔧 Development — kept green on a branch
+
+Seven dimensions you can answer without deploying anything. Every one is measured against the code or the suite, so all seven run on a laptop, at module scope, in the middle of an afternoon. [`code-quality`](skills/quality/code-quality/SKILL.md) is the front door; the rest fill it.
+
+##### 🧭 [`code-quality`](skills/quality/code-quality/SKILL.md) 🧪
+
+The development front door: the seven dimensions you can answer without deploying anything. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing, and a file can be perfectly unique and unreadable. All seven are measured against the code or the suite, so all seven run on a laptop, on a branch, at module scope, in the middle of an afternoon. That is what makes this the set to keep green during development rather than at a release gate.
+
+Called on a repo with no reports at all, it works out which of the seven that project should cover and which are a practice the team may take or leave — then hands over **one** command, the cheapest thing you can run today, and keeps the rest of the list in the report. Finish that one, call it again, and it names the next. It asks only about dimensions whose precondition is already met, so a repo with no tests is never asked to weigh mutation testing. On a codebase with nothing measured it gives an eight-move ladder that runs the spec first, because every other dimension here measures the code against itself and only the scenarios say what the code was *for*.
 
 **Use it when you want to:**
 
-- Find out whether your tests would actually catch a bug, not just execute the line.
-- Turn a high coverage number into a real measure of test quality.
-- Have the missing tests written and proven, once you have read the report and said go.
-- Set a mutation score gate in CI that runs over changed files.
+- A starting point when you have run none of these skills and want to know which ones your project needs.
+- One verdict on the code's health instead of seven reports to reconcile.
+- To know whether a coverage number means anything, judged against the other signals.
+- An ordered list of what to fix first, drawn from every report at once.
+- A starting plan for a codebase with no tests at all, ordered by risk rather than by file.
 
-**Trigger it with:** `/mutation-test`. It never fires on its own.
+**Trigger it with:** `/code-quality`. It never fires on its own — and neither do the sibling skills it draws on, so when a signal is missing it hands you the command to fill it rather than running it for you.
 
-**Credit:** the process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), MIT licensed.
-
-#### 📊 [`code-coverage`](skills/quality/code-coverage/SKILL.md) 🧪
+##### 📊 [`code-coverage`](skills/quality/code-coverage/SKILL.md) 🧪
 
 Runs the unit tests with coverage on and turns the number into a plan. The agent picks the tool your language uses, turns branch coverage on, and records every exclusion with a reason. Then it ranks the gaps instead of listing them — git churn crossed with what the code decides, so money, permissions, and data writes go to the top. Each gap near the top names the behaviour nobody tests and a concrete test to add. Nothing is written to your tests, your config, or CI until you say go.
 
@@ -218,7 +268,22 @@ Runs the unit tests with coverage on and turns the number into a plan. The agent
 
 **Its sibling:** coverage says a line ran; [`mutation-test`](skills/quality/mutation-test/SKILL.md) says whether the line is checked. Run this one first — it is the cheaper half.
 
-#### 💩 [`crap-test`](skills/quality/crap-test/SKILL.md) 🧪
+##### 🧬 [`mutation-test`](skills/quality/mutation-test/SKILL.md) 🧪
+
+Checks the tests, not the code. The agent breaks your source on purpose, one small edit at a time — each edit is a *mutant* — and a good test suite goes red on every one. A mutant that survives marks a behaviour nobody is testing. You get a timestamped report listing every survivor, the behaviour it exposes, and the test that would kill it. Your tests are not touched until you say go.
+
+**Use it when you want to:**
+
+- Find out whether your tests would actually catch a bug, not just execute the line.
+- Turn a high coverage number into a real measure of test quality.
+- Have the missing tests written and proven, once you have read the report and said go.
+- Set a mutation score gate in CI that runs over changed files.
+
+**Trigger it with:** `/mutation-test`. It never fires on its own.
+
+**Credit:** the process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), MIT licensed.
+
+##### 💩 [`crap-test`](skills/quality/crap-test/SKILL.md) 🧪
 
 Scores every function with the CRAP metric — `complexity² × (1 − coverage)³ + complexity` — so complex code and untested code are read as one number instead of two. The run is a replay: the agent writes one stdlib-only script, proves it against twelve fixed vectors before it touches your repo, then joins a complexity file to a coverage file and prints a CSV. The script, both inputs, and the CSV are saved beside the report, so anyone can re-run it and get the same table. The order is the score and nothing else. Nothing is written to your tests or your source until you say go.
 
@@ -234,7 +299,21 @@ Scores every function with the CRAP metric — `complexity² × (1 − coverage)
 
 **Its siblings:** it reuses what [`code-coverage`](skills/quality/code-coverage/SKILL.md) and [`static-analysis`](skills/quality/static-analysis/SKILL.md) measure separately, and crosses them. Coverage ranks gaps by risk, which is a judgement; this one ranks by arithmetic. Run both — they disagree usefully.
 
-#### 🧬 [`dry-test`](skills/quality/dry-test/SKILL.md) 🧪
+##### 🔬 [`static-analysis`](skills/quality/static-analysis/SKILL.md) 🧪
+
+Reads the code without running it, over the paths you name — or over the files changed against the default branch if you name none. It runs three kinds of tool: a type checker, a linter, and a dead code finder. Then it cuts the noise. Findings are grouped by *rule*, because one rule firing 200 times is one decision and not 200 problems, then categorised and re-ranked by what the code decides. Each real finding gets one plain sentence on what goes wrong and a fix written as a diff. It works on untested code: a red suite or no suite does not stop the reading, only the fixing. Security sits outside this run — that is `security-compliance`. Nothing is changed until you say go.
+
+**Use it when you want to:**
+
+- Point a set of analyzers at specific folders or files and get one readable report.
+- See the real bugs separated from the style noise.
+- Get a fix diff per finding, and know how many fix themselves.
+- Put a baseline in place so CI fails on new findings without failing on the past.
+- Have the fixes applied and proven, once you have read the report and said go.
+
+**Trigger it with:** `/static-analysis`. It never fires on its own.
+
+##### 🧬 [`dry-test`](skills/quality/dry-test/SKILL.md) 🧪
 
 Finds functions that share a *shape*, in fourteen languages, and then refuses to call that a DRY violation on its own. It ships its own engine: [`dry.py`](skills/quality/dry-test/scripts/dry.py) is a port of Robert C. Martin's [dry4go](https://github.com/unclebob/dry4go) onto tree-sitter grammars — each function's syntax tree becomes a set of subtree fingerprints with names and literal values stripped, and two functions are scored by Jaccard similarity over those sets. Clones are grouped into families, and each family is crossed with a second measurement: how often git says those files were edited *together*. Shape says they look alike; co-change says whether they have ever moved as one. The report ends with the one question a machine cannot answer — does the same sentence describe what every member knows?
 
@@ -252,21 +331,7 @@ Finds functions that share a *shape*, in fourteen languages, and then refuses to
 
 **Credit:** the algorithm — normalised syntax trees, subtree fingerprints, Jaccard similarity, and the `--min-lines` / `--min-nodes` floors — is [Robert C. Martin's](https://github.com/unclebob), from [`dry4go`](https://github.com/unclebob/dry4go). `dry.py` is an independent implementation of it over tree-sitter; no dry4go source is bundled here.
 
-#### 🔬 [`static-analysis`](skills/quality/static-analysis/SKILL.md) 🧪
-
-Reads the code without running it, over the paths you name — or over the files changed against the default branch if you name none. It runs three kinds of tool: a type checker, a linter, and a dead code finder. Then it cuts the noise. Findings are grouped by *rule*, because one rule firing 200 times is one decision and not 200 problems, then categorised and re-ranked by what the code decides. Each real finding gets one plain sentence on what goes wrong and a fix written as a diff. It works on untested code: a red suite or no suite does not stop the reading, only the fixing. Security sits outside this run — that is `security-compliance`. Nothing is changed until you say go.
-
-**Use it when you want to:**
-
-- Point a set of analyzers at specific folders or files and get one readable report.
-- See the real bugs separated from the style noise.
-- Get a fix diff per finding, and know how many fix themselves.
-- Put a baseline in place so CI fails on new findings without failing on the past.
-- Have the fixes applied and proven, once you have read the report and said go.
-
-**Trigger it with:** `/static-analysis`. It never fires on its own.
-
-#### 🧼 [`clean-code`](skills/quality/clean-code/SKILL.md) 🧪
+##### 🧼 [`clean-code`](skills/quality/clean-code/SKILL.md) 🧪
 
 Reads the code the way a person does, against the clean code rules — fifty-six of them in nine groups, from names and functions through comments, structure, objects and tests. This is the half no linter reaches: a tool can prove a function is 80 lines long, but only a reader can say it does two things, that a name lies about what it holds, or that a comment repeats the line beneath it. The risk is the mirror of a linter's, so the skill's spine is the cut: a rule broken that causes no **smell** — rigidity, fragility, immobility, needless complexity, needless repetition, opacity — is taste, and taste is counted and dropped rather than reported. The project's own conventions beat the rule list, and anything a formatter, a linter, or a sibling skill already owns is struck off before the reading starts. Every fix keeps the behaviour; a fix that needs the behaviour to change becomes a bug report instead.
 
@@ -282,7 +347,30 @@ Reads the code the way a person does, against the clean code rules — fifty-six
 
 **Credit:** the rules are [Robert C. Martin's](https://github.com/unclebob), from *Clean Code*, by way of [Wojtek Lukaszuk's summary](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29). What the skill adds is the reading procedure, the smell ranking, and the report.
 
-#### 🤝 [`contract-test`](skills/quality/contract-test/SKILL.md) 🧪
+##### 🥒 The BDD four fill the seventh dimension
+
+`to-bdd`, `wire-bdd`, and `run-bdd` fill **specified behaviour** — does the written spec hold — and `run-bdd` writes the `bdd-report-` that `/code-quality` reads. They live in the [🥒 BDD](#-bdd) category above because they are useful on their own, but this is the phase they belong to. The three go end to end on a repo with no tests at all: `to-bdd` mines a draft from the code where no requirements are written, `wire-bdd` builds the harness rather than needing one, `run-bdd` runs the result. `sync-bdd` keeps the scenarios in step with the code afterwards.
+
+#### 🚦 Release — run at the gate
+
+Five dimensions that are properties of a deployed whole rather than of a file. None can be run at module scope or answered with the service stopped, and each is blocked on an **environment** rather than on effort. [`release-quality`](skills/quality/release-quality/SKILL.md) is the front door; the rest fill it.
+
+##### 🚦 [`release-quality`](skills/quality/release-quality/SKILL.md) 🧪
+
+The release front door: the five dimensions that are properties of a deployed whole rather than of a file. None can be run at module scope, none can be answered with the service stopped, and each is blocked on an **environment** rather than on effort — a URL, a Docker daemon, a load environment, permission to break things. So the skill names the precondition per dimension, because "we need a staging instance we are allowed to break" is a request a team can act on and "resilience is unproven" is not.
+
+It checks one thing nothing else in the family checks: the **environment** each report ran against. A stress report from a staging database a twentieth the size of production measured a system nobody operates, so that report is graded ⚫ Unproven rather than believed — a number from the wrong environment is worse than no number, because it reads as evidence. And it closes with the line the whole skill exists for: **is this safe to release** — ready, ready with named limits, not ready, or unknown. It never softens *unknown* into *probably fine* on the strength of a year without incident.
+
+**Use it when you want to:**
+
+- A release readiness check that says plainly what it does not know.
+- To know whether a clean contract run covered the whole API or a fifth of it.
+- One verdict across security, contracts, seams, resilience, and load instead of five reports.
+- An ordered plan for a system where none of this has ever been measured, cheapest favour asked first — security on a build, contracts on a URL, seams on Docker, then the two that need a platform conversation.
+
+**Trigger it with:** `/release-quality`. It never fires on its own.
+
+##### 🤝 [`contract-test`](skills/quality/contract-test/SKILL.md) 🧪
 
 Tests a running API against its own contract, from the outside. The source is never opened: every finding comes from a request the agent sent and the response it got back, so the report says what a real consumer hits. A gap between the promise and the behaviour is a *drift*. The agent finds the contract — published in the repo, served by the running app, or derived from the route definitions — runs a conformance tool against a target you pin, then sends by hand the promises no tool checks on its own: guards, error bodies, media types, unknown ids, pagination. Two numbers come out side by side: how much of the contract was exercised, and how much of that had no drift. Your API source is never edited.
 
@@ -300,7 +388,7 @@ Tests a running API against its own contract, from the outside. The source is ne
 
 **Its siblings:** coverage and mutation testing look inward at the code; this one stands outside the box and asks whether the API keeps its word.
 
-#### 🔗 [`integration-test`](skills/quality/integration-test/SKILL.md) 🧪
+##### 🔗 [`integration-test`](skills/quality/integration-test/SKILL.md) 🧪
 
 Writes the tests that run against your real database, broker, cache, and object store. A *seam* is where your code hands work to something it does not own. Unit tests stop at the seam and mock what is on the far side, so everything they prove is a statement about your own mock. This skill crosses it: one rule sorts the seams — run the collaborators you own in a container the suite starts itself, fake the ones you do not — and a seam left mocked in-process is reported as *unproven* rather than counted. Every test is *proven red* before it is trusted, and the suite is proven *hermetic* four ways: alone, shuffled, twice with no wipe, and in parallel. Your production code is left alone.
 
@@ -314,7 +402,7 @@ Writes the tests that run against your real database, broker, cache, and object 
 
 **Trigger it with:** `/integration-test`. It never fires on its own.
 
-#### 💥 [`fault-injection-test`](skills/quality/fault-injection-test/SKILL.md) 🧪
+##### 💥 [`fault-injection-test`](skills/quality/fault-injection-test/SKILL.md) 🧪
 
 Breaks the environment under your running system and watches what happens. First it writes down the *steady state* — the few numbers that say the system is serving people, each with the command that reads it and a tolerance band. Then it takes the dependencies down, slows them past the timeout, makes them flap, fills the disk, kills a container mid-request, and partitions the network, one fault at a time, with a hypothesis written before each run. The blast radius, the abort condition, and the kill switch are all fixed first, and the kill switch is tested while nothing is wrong. Two things come out: how many experiments held their steady state, and whether it came back afterwards. Your production code is not touched until you say go.
 
@@ -333,7 +421,7 @@ Ask it to fix things and it adds one mechanism at a time — a timeout, backoff 
 
 **Needs:** a running system under a realistic load, and a container runtime for the injector. Production or shared staging needs recorded authorization first.
 
-#### 📈 [`stress-test`](skills/quality/stress-test/SKILL.md) 🧪
+##### 📈 [`stress-test`](skills/quality/stress-test/SKILL.md) 🧪
 
 Raises the load until your system stops keeping up, and finds the *knee* — the point where throughput stops rising and latency starts climbing. Below it, more load means more work done; above it, more load means only more waiting. Then it names what gave first: the connection pool, one pinned core, garbage collection, a query without an index. A knee with no cause named is a number nobody can act on. The figure it leads with is **headroom** — the knee divided by the peak you actually have to serve, which is the one number someone outside the team can use.
 
@@ -352,7 +440,41 @@ It is strict about one thing above all. A load generator that waits for each res
 
 **Needs:** a running instance and a load generator. Shared staging or production needs recorded authorization first, and third parties are stubbed by default.
 
-#### ♿ [`visual-accessibility`](skills/quality/visual-accessibility/SKILL.md) 🧪
+##### 🛡️ [`security-compliance`](skills/quality/security-compliance/SKILL.md) 🧪
+
+Scans the code, its dependencies, its full git history, and the running app, then sorts the findings by the only fact that decides which one matters: *reach*. A CVSS 9.8 in a build-time dependency reaches nobody; a 5.3 on an unauthenticated route reaches everybody, and it is the one that gets used. So every finding carries a path — entry point, route through the code, sink — or a written argument for why no path exists. What scanners are useless at, the agent reads by hand: IDOR, missing route authorization, tenant isolation, SSRF, business logic, crypto misuse, and what leaks into logs. DAST runs only with authorization recorded first — approver, staging target, hosts, window, and rate limit. Secret values and captured PII stay out of the report.
+
+**Use it when you want to:**
+
+- Get one security review across code, dependencies, history, containers, and the live app.
+- Find out which of your hundreds of CVEs an attacker can actually reach.
+- See your findings mapped to OWASP Top 10 and CWE, with the categories no tool checked named as gaps.
+- Run an authorized DAST pass against staging with the scope and window recorded.
+- Get a fix per finding, and know which need a design change rather than a patch.
+- Set the four CI gates, including the scheduled dependency scan — a repo clean on Friday is vulnerable on Monday and no commit announces it.
+
+**Trigger it with:** `/security-compliance`. It never fires on its own.
+
+#### 🎨 Visual — run against a rendered page
+
+Two dimensions that need pixels. Both drive a real browser, and neither can be read out of source. They answer the two halves of one question: can a person use this interface, and would they remember it. [`visual-quality`](skills/quality/visual-quality/SKILL.md) is the front door; the rest fill it.
+
+##### 🎨 [`visual-quality`](skills/quality/visual-quality/SKILL.md) 🧪
+
+The visual front door: the two dimensions that need pixels. Both drive a real browser, and neither can be read out of source — a focus ring nobody can see and a row of tag chips above a tinted icon tile do not exist until the page renders. They answer the two halves of one question. **Access** asks whether a person can use the interface. **Signature** asks whether they would remember it. The common shape is a page that fails both while looking fine to whoever built it.
+
+The most likely correct answer here is *not applicable*, and the skill says so in a line rather than grading a JSON API ⚫ Unproven on access. Where an interface does exist, it widens each report's scope to the shared components and the style layer — a commit to a `Button` invalidates every report that rendered one — and records which routes, widths, themes, and states were walked, because a page checked at 1440 in light mode was checked once, not four ways. Its sharpest finding is a pair: a P1 barrier sitting on the element that also carries the worst tell stack, which is one rebuild rather than two fixes.
+
+**Use it when you want to:**
+
+- To know, in plain words, whether everyone can use the interface and whether anyone would remember it.
+- One verdict across accessibility and design instead of two reports about the same screen.
+- To find the element that is both unusable and undesigned, and rebuild it once.
+- A fix list that says which findings belong in a shared component and how many pages that reaches.
+
+**Trigger it with:** `/visual-quality`. It never fires on its own.
+
+##### ♿ [`visual-accessibility`](skills/quality/visual-accessibility/SKILL.md) 🧪
 
 Drives your running UI in a real browser and checks it against WCAG. A rules engine sees about a third of WCAG, and it is not the third that stops people — so the agent runs whichever engine your project already has (axe, Pa11y, Lighthouse, jest-axe), then drives the rest by hand with the [`vibium`](https://github.com/vibium/vibium) browser CLI: tab order, focus visibility, keyboard traps, reflow at 320px, reduced motion, forced colours, live regions. Findings are ranked by *barrier* — what a person cannot do because of it — so a keyboard trap in checkout outranks a contrast miss on a footer link. Every finding carries the command that reproduces it and a screenshot. Your UI source is left alone.
 
@@ -369,7 +491,7 @@ Drives your running UI in a real browser and checks it against WCAG. A rules eng
 
 **Needs:** a running instance and the `vibium` CLI. No test suite required.
 
-#### 🫠 [`visual-slop`](skills/quality/visual-slop/SKILL.md) 🧪
+##### 🫠 [`visual-slop`](skills/quality/visual-slop/SKILL.md) 🧪
 
 Checks your running UI against the [pols.dev anti-slop design law](https://pols.dev/slop.md) — about 150 named *tells* of a generated interface, fetched fresh each run and walked heading by heading, so the review is against the law rather than against the agent's taste. Findings are ranked by what they *stack* with: one pill is a choice, but an icon tile plus a category pill plus tag chips plus a hairline border plus a glowy button in one card is the clearest slop signature there is. Because the law's own deepest point is that dodging the list is still slop, every finding carries the replacement rather than just the removal, and the page gets one verdict on whether it has a signature at all. Nothing is changed until you say go.
 
@@ -388,41 +510,10 @@ Ask it to fix things and it builds the *signature first*, before removing a sing
 
 **Needs:** a running instance, the `vibium` CLI, and network access to fetch the law.
 
-#### 🛡️ [`security-compliance`](skills/quality/security-compliance/SKILL.md) 🧪
-
-Scans the code, its dependencies, its full git history, and the running app, then sorts the findings by the only fact that decides which one matters: *reach*. A CVSS 9.8 in a build-time dependency reaches nobody; a 5.3 on an unauthenticated route reaches everybody, and it is the one that gets used. So every finding carries a path — entry point, route through the code, sink — or a written argument for why no path exists. What scanners are useless at, the agent reads by hand: IDOR, missing route authorization, tenant isolation, SSRF, business logic, crypto misuse, and what leaks into logs. DAST runs only with authorization recorded first — approver, staging target, hosts, window, and rate limit. Secret values and captured PII stay out of the report.
-
-**Use it when you want to:**
-
-- Get one security review across code, dependencies, history, containers, and the live app.
-- Find out which of your hundreds of CVEs an attacker can actually reach.
-- See your findings mapped to OWASP Top 10 and CWE, with the categories no tool checked named as gaps.
-- Run an authorized DAST pass against staging with the scope and window recorded.
-- Get a fix per finding, and know which need a design change rather than a patch.
-- Set the four CI gates, including the scheduled dependency scan — a repo clean on Friday is vulnerable on Monday and no commit announces it.
-
-**Trigger it with:** `/security-compliance`. It never fires on its own.
-
-#### 🧭 [`code-quality`](skills/quality/code-quality/SKILL.md) 🧪
-
-The front door to all twelve dimensions, and the skill that reads their reports together. Each one alone is easy to misread — 90% coverage looks like health right up until the mutation score says the tests assert nothing. This skill collects the newest report of each kind from every `.reports/` folder, checks each is still fresh enough to believe, cross-reads them, and gives one graded verdict. The verdict is a floor, not an average, and a report that is missing, skipped, or stale counts as *unproven* rather than as a pass.
-
-Called on a repo with no reports at all, it works out which of the twelve dimensions that project should cover, which do not apply, and which are a practice the team may take or leave — then hands over **one** command — the cheapest thing you can run today — and keeps the rest of the list in the report. Finish that one, call it again, and it names the next. It asks only about dimensions whose precondition is already met, so a repo with no tests is never asked to weigh mutation testing. It is equally careful about what your question can answer: the twelve split into three families by what each is measured against — the code, the test suite, or a running system — so asking about one module marks four of them **out of scope** rather than unproven, because unproven reads as work somebody skipped and this is work nobody could have done at the scope you gave.
-
-**Use it when you want to:**
-
-- A starting point when you have run none of these skills and want to know which ones your project needs.
-- One verdict on the code's health instead of twelve reports to reconcile.
-- To know whether a coverage number means anything, judged against the other signals.
-- A release readiness check that says plainly what it does not know, and what your scope could never have told it.
-- An ordered list of what to fix first, drawn from every report at once.
-- A starting plan for a codebase with no tests at all, ordered by risk rather than by file.
-
-**Trigger it with:** `/code-quality`. It never fires on its own — and neither do the sibling skills it draws on, so when a signal is missing it hands you the command to fill it rather than running it for you.
-
 *More skills will be added over time.*
 
 ---
+
 
 ## 🤖 Available agents
 
@@ -504,7 +595,7 @@ Once installed, trigger a skill with natural language that matches its purpose �
 - The `to-bdd` skill's Gherkin rules are distilled from [AutomationPanda/gherkin-guidelines-for-ai](https://github.com/AutomationPanda/gherkin-guidelines-for-ai) by [Andrew Knight](https://github.com/AutomationPanda), and its domain-driven framing from the [`bdd-gherkin`](https://github.com/angelo-v/opencode-playground/blob/main/.opencode/skills/bdd-gherkin/SKILL.md) skill by [Angelo Veltens](https://github.com/angelo-v), which is MIT licensed. The rules are theirs; this repo restated them as a step-by-step skill.
 - The `mutation-test` skill's process outline comes from the [`add-mutation-testing`](https://github.com/qdhenry/Claude-Command-Suite/blob/main/.claude/commands/test/add-mutation-testing.md) command in [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) by [Quinney Henry](https://github.com/qdhenry), which is MIT licensed. The mutation-testing loop is theirs; this repo added the triage buckets, the score formula, and the report.
 - The `dry-test` skill's engine implements the algorithm of [`dry4go`](https://github.com/unclebob/dry4go) by [Robert C. Martin](https://github.com/unclebob) — normalised syntax trees, one fingerprint per subtree, Jaccard similarity, and the `--min-lines` / `--min-nodes` floors. The algorithm is his; [`dry.py`](skills/quality/dry-test/scripts/dry.py) is an independent implementation of it over tree-sitter grammars so it runs on fourteen languages, and no dry4go source is bundled here.
-- The `code-coverage`, `static-analysis`, `code-quality`, `crap-test`, and `dry-test` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
+- The `code-coverage`, `static-analysis`, `code-quality`, `release-quality`, `visual-quality`, `crap-test`, and `dry-test` skills were designed with, and `mutation-test` and `run-bdd` reshaped by, the [`writing-great-skills`](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) skill by [Matt Pocock](https://github.com/mattpocock), from the MIT-licensed [mattpocock/skills](https://github.com/mattpocock/skills). None of its text is bundled here — what it contributed is the method: completion criteria on every step, the information hierarchy that decides what stays in `SKILL.md`, leading words, and the pruning discipline. The shape of these skills owes it a great deal.
 
 ---
 

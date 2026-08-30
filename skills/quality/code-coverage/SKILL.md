@@ -215,6 +215,13 @@ spanning several writes to the repository root. Create the folder if missing, ad
 `.reports/` to the root `.gitignore` if nothing there covers it, one file per run, never
 overwrite an older one.
 
+**Keep the machine-readable coverage file beside it**, under the report's own timestamp —
+`coverage-<timestamp>.lcov`, `.info`, `.out`, `.xml`, `.json`, whatever the tool wrote. It
+costs nothing to keep and it is the exact input `/crap-test` needs. Without it that skill runs
+the whole suite with coverage on a second time to rebuild a file that existed ten minutes ago,
+which on a large suite is the expensive half of both runs done twice. Name it in the report
+header beside the tool and the command that produced it.
+
 Write this report on a fix run too, and *before* you touch a test. This is the before;
 without it there is nothing to compare against, and a number you remember is not a number
 you can show.
@@ -228,10 +235,11 @@ Then tell the user the file path, the line and branch percentages, and the one P
 close first. On a report-only run, say the report is all this run changed, so they can ask
 for the gaps to be closed next.
 
-**Done when:** the report sits in the module's `.reports` folder, `.reports/` is git-ignored,
-no older report was overwritten, and it holds every section of the shape below — including
-every P1 and P2 gap with its behaviour sentence, label and suggested test, and the exclusion
-list with reasons.
+**Done when:** the report sits in the module's `.reports` folder, the machine-readable
+coverage file sits beside it under the same timestamp and is named in the header, `.reports/`
+is git-ignored, no older report was overwritten, and it holds every section of the shape below
+— including every P1 and P2 gap with its behaviour sentence, label and suggested test, and the
+exclusion list with reasons.
 
 ## 8. Close the gaps — on a fix signal
 
@@ -295,6 +303,7 @@ a real report lists them all.
 | **Run** | <YYYY-MM-DD HH:MM:SS> |
 | **Tool** | `vitest 3.0.5 (v8)` |
 | **Command** | `<the command you ran>` |
+| **Data** | [`coverage-2026-07-30-142205.json`](./coverage-2026-07-30-142205.json) — the machine-readable file, kept for `/crap-test` |
 | **Commit** | `<short sha>` (dirty working tree) |
 | **Scope** | `src/**` — 84 files, 6 excluded |
 | **Suite** | 412 passed, 0 failed, 3 skipped |
