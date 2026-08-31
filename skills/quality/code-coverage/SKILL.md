@@ -139,6 +139,29 @@ The `grep .` matters: `--name-only` prints a blank line between commits, and wit
 blank sorts to the top as your busiest file. A file that changes often and is not covered
 breaks often and quietly.
 
+**Churn you can see right now beats churn from six months ago.** A file changed on this branch
+is being edited today, so an uncovered gap in it is the gap most likely to ship:
+
+```sh
+base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)
+if [ -z "$base" ]; then
+  for c in origin/main origin/master origin/develop main master; do
+    git rev-parse --verify --quiet "$c" >/dev/null && base=$c && break
+  done
+fi
+[ -n "$base" ] && git diff --name-only "$base"...HEAD
+```
+
+Files on that list sort first inside whichever bucket they land in. They do not get their own
+bucket and they do not skip the risk test below — an untested log formatter you touched this
+morning is still P3.
+Both empties need saying out loud. **An empty `$base`** means no branch to compare against —
+no `origin`, or a remote named something else — and a silent empty list reads as "nothing is
+being edited", which is the opposite of what it means. **An empty diff against a good base**
+usually means the work is still in the working tree, so add `git diff --name-only HEAD` and
+`git status --porcelain` to catch this morning's edits. The three-dot diff only sees committed
+work, and on `main` it sees nothing at all.
+
 **Size of the gap** — uncovered lines and branches in that file.
 
 **What the code decides** — read it. Money, permissions, data writes, and calls to other
