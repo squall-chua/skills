@@ -21,7 +21,8 @@ own tools and paths. Tables are shown with one or two rows; a real report lists 
 # 🔴 Fragile — 0 of 6 applicable dimensions unproven, 1 set aside by choice
 
 The tests reach most of the code and check very little of it: 78% line coverage sits behind
-a 61% mutation score, and two survivors are in the refund path. Change risk is the more
+a 61% mutation score, and two survivors were in the refund path when it was last measured —
+`refund.ts` has changed since, so that pair needs re-running before it is acted on. Change risk is the more
 urgent half — `applyRefund` scores 148.6 and cannot be brought under by testing alone, so
 every fix to the refund path lands in a function nobody can safely edit.
 
@@ -37,8 +38,8 @@ those five. Access and signature need a rendered interface — run `/visual-qual
 
 | Dimension | Relevance | Grade | The numbers | Evidence | Behind HEAD |
 | --- | --- | --- | --- | --- | --- |
-| Verified behaviour | applies | 🟡 Thin | lines 78.4%, branches 60.8%, 3 files at 0% | [coverage](./coverage-report-2026-07-30-142205.md) | 0 commits |
-| Test strength | applies | 🔴 Fragile | score 61.4%, 12 survivors, 3 no-coverage | [mutation](./mutation-report-2026-07-30-091412.md) | 2 commits |
+| Verified behaviour | applies | 🟡 Thin | lines 78.4%, branches 60.8%, 3 files at 0% | [coverage](./coverage-report-2026-07-30-142205.md) | 0 commits — current |
+| Test strength | applies | 🔴 Fragile on 37 of 40 files | score 61.4%, 12 survivors, 3 no-coverage | [mutation](./mutation-report-2026-07-30-091412.md) | 2 commits — partial |
 | Change risk | applies | 🔴 Fragile | 9 functions over 30, 1 needs splitting, worst `applyRefund` at 148.6 | [CRAP](./crap-report-2026-07-30-160244.md) | 0 commits |
 | Specified behaviour | by choice | — | — | none | — |
 | Construction | applies | 🔴 Fragile | 14 bug — 3 in the refund path — 61 risk findings | [static analysis](./static-analysis-report-2026-07-30-153001.md) | 0 commits |
@@ -47,6 +48,16 @@ those five. Access and signature need a rendered interface — run `/visual-qual
 
 Test strength, change risk, and construction are jointly at the floor, so the verdict is
 🔴 Fragile.
+
+The mutation report is **partial**: `refund.ts`, `ledger.ts`, and `tax.ts` changed since it
+ran, so its 61.4% describes the other 37 files. Re-running it needs those three files only,
+not the module.
+
+**One of those three is `refund.ts`, and the refund path is what set the floor.** So the two
+survivors named in the verdict are a lead, not evidence — they were found in a version of that
+file which no longer exists, and nothing here says whether the edit killed them or added more.
+A partial report that still covers everything except the code somebody is editing today is the
+weakest evidence in this table, whatever its percentage.
 
 ## What is not graded here
 
@@ -84,7 +95,7 @@ same would move the wrong number.
 | # | Do this | Why it is here | Costs | Command |
 | --- | --- | --- | --- | --- |
 | 1 | Split `applyRefund` into the three decisions it makes | 🔴 on change risk and the worst readability cluster in one function | a day | — |
-| 2 | Kill the 2 mutation survivors in the refund path | the tests run that code and do not check its result. A wrong refund total passes today | half a day | `/mutation-test` |
+| 2 | Re-run mutation on the 3 changed files, then kill what survives | the refund-path survivors were found before `refund.ts` changed, so the current count is unknown | minutes to re-run, half a day to kill | `/mutation-test` |
 
 ## Next phase
 

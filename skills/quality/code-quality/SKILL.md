@@ -86,26 +86,54 @@ git diff --stat <report commit>..HEAD -- <the report's scope>
 | --- | --- | --- |
 | **Current** | the report's commit is HEAD, and no file in scope has changed since | full evidence |
 | **Near** | commits since, but none touching the report's scope | full evidence |
-| **Stale** | files in scope changed since | a lead, not evidence |
+| **Partial** | under half the files in scope changed since | full evidence for the unchanged files, none for the changed ones |
+| **Stale** | half the scope or more changed since | a lead, not evidence |
 | **Unusable** | the commit is unknown to this repo | no evidence |
 
+**Partial is the normal state during development, and it is the row that protects the day.**
+A report does not stop being evidence because one file moved. It stops being evidence *for that
+file*. So name the changed files rather than the report:
+
+```sh
+git diff --name-only <report commit>..HEAD -- <the report's scope>
+```
+
+That list is the only thing a re-run has to cover. A coverage report on forty files with three
+of them touched is thirty-seven files of standing evidence and three to measure again — not a
+whole run thrown away. Carry the report's grade for the untouched files, mark the touched ones
+unproven, and say both in step 4: "Sound on 37 of 40 files; 3 changed since and unmeasured."
+
+**The half is a floor, and both directions matter.** Marking a report stale because any file
+in it moved is what makes these seven feel expensive: on a branch that moves every day it
+condemns every report every day, and the reader re-runs the repo to learn what a diff would
+have told them. But a grade earned by one file in forty is not evidence either, however
+carefully you qualify it — past half, the report describes a codebase that no longer exists
+and the honest word for it is Stale.
+
 Every sibling writes "dirty working tree" into its header when the tree was dirty. That note
-means the run covered code the commit does not hold, so compare against the working tree
-instead: run `git status --porcelain -- <the report's scope>` and rate the report
-**Current** when nothing in its scope has been touched since, **Stale** when something has.
-A dirty tree alone is not a reason to discard the reports somebody just generated.
+means the run covered code the commit does not hold, so add the working tree to the check —
+**as well as** the commit diff, never instead of it. Run `git status --porcelain -- <the
+report's scope>`, union its files with the `<report commit>..HEAD` list, and read the states
+off the union. Skipping the commit half is how a report generated five commits ago on a tree
+that is clean today grades **Current** and carries stale numbers forward as full evidence.
+
+The union over-reports in one direction: a file already dirty when the sibling ran is a file
+that run *did* measure. Where the sibling's header names what it read, trust that over the
+porcelain. A dirty tree alone is not a reason to discard the reports somebody just generated.
 
 Staleness bites harder here than in the other two phases. These seven are read during
 development, on a branch that moves every day, so a report three days old is often already
 describing code that no longer exists. Check the distance every run; do not carry a grade
-forward because it was fresh last time.
+forward because it was fresh last time — but check it file by file, so what you carry forward
+is the part that is still true rather than the whole report or nothing.
 
 Scope matters as much as age. A coverage report on `src/domain/` says nothing about
 `src/http/`, however fresh. Record what each report covered and what it left out.
 
-**Done when:** every report carries a state and its commit distance, every dirty-tree report
-was rated against uncommitted changes in its own scope rather than discarded, and every gap
-between a report's scope and the code you were asked about is written down.
+**Done when:** every report carries a state and its commit distance, every Partial one names
+the changed files that need re-measuring rather than being condemned whole, every dirty-tree
+report was rated against uncommitted changes in its own scope rather than discarded, and every
+gap between a report's scope and the code you were asked about is written down.
 
 ## 3. Judge relevance, then settle the gaps
 
@@ -167,7 +195,7 @@ a tie. Costs come from the step 7 table. Below, a repo that has a suite:
 | Readability | applies | no report | `/clean-code` | under an hour | the next person guesses, and guesses wrong in the code that moves money |
 | Verified behaviour | applies | no report, suite exists | `/code-coverage` | minutes | no idea which code runs under test |
 | Change risk | applies | no report | `/crap-test`, after `/code-coverage` | minutes | no list of the functions dangerous to edit |
-| Test strength | applies | stale, 47 commits behind | `/mutation-test` | an afternoon or more | the coverage number stays unexamined |
+| Test strength | applies | stale, 47 commits behind | `/mutation-test` | minutes on the branch diff | the coverage number stays unexamined |
 | Specified behaviour | by choice | no `.feature` files | `/to-bdd`, `/wire-bdd`, `/run-bdd` | an afternoon or more | nothing states what the code is supposed to do |
 
 **Anything waiting on a precondition is one line, not rows.** On a repo with no suite: "Verified
@@ -227,6 +255,13 @@ Four results in that table override the numbers beside them, whatever those numb
 | A CRAP join below 95% | change risk **Unproven** | the two input files did not line up, so the table describes a fraction of the functions while looking complete |
 | A DRY self-check that did not pass | single source **Unproven** | a clone finder that parsed nothing reports "no duplicates", which reads exactly like good news |
 | A clean code run whose scope was one folder of many | readability graded on that folder alone, and the report says so | the skill reads the paths it was given, so a green here is never a statement about the repository |
+
+**A Partial report grades on the files it still covers.** Give the dimension the grade its
+unchanged files earn, and say how many files that was out of the scope: "🟢 Sound on 37 of 40
+files; 3 changed since." The changed files are unproven, not a grade of their own, so they do
+not drag the band down — they narrow what the band is a statement about. Where the changed
+files are the P1 ones the report singled out, say that too: a green over everything except the
+code somebody is editing today is the weakest green in this report.
 
 These bands are a default. Where the project has its own gates — a coverage threshold in
 its config, a mutation threshold, a CI rule — those are the project's own standard and they
@@ -355,9 +390,15 @@ dimension whose precondition is met. The first move has to finish, not impress.
 
 | Cost | Skills |
 | --- | --- |
-| **minutes** | `/static-analysis`, `/dry-test`, `/code-coverage`, `/crap-test` |
+| **minutes** | `/static-analysis`, `/dry-test`, `/code-coverage`, `/crap-test`, `/mutation-test` over the branch diff |
 | **under an hour** | `/clean-code` |
-| **an afternoon or more** | `/mutation-test`, and the BDD three |
+| **an afternoon or more** | `/mutation-test` over a module or the repo, and the BDD three |
+
+`/mutation-test` is the one whose cost is set by the scope you give it, because it runs the
+suite once per mutant. On the files changed against the default branch — which is what it
+now takes when nobody names paths — it is minutes, and that is the version to recommend
+during development. Say which scope your estimate assumes; "an afternoon" for a module and
+"minutes" for a branch are the same skill.
 
 Two rules break a tie: a defect-finder beats a measurement, and code somebody is editing today
 beats code at rest. Then order the rest by value:

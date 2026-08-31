@@ -183,6 +183,31 @@ read.
 **The bucket sorts, the sentence decides.** When they disagree, say so in the report — that
 disagreement is the most useful line in it.
 
+**Read the families touching the branch first.** The scan itself is seconds; this step is the
+slow one, because it is a person or an agent reading code. So order the reading by what is
+being edited right now:
+
+```sh
+base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)
+if [ -z "$base" ]; then
+  for c in origin/main origin/master origin/develop main master; do
+    git rev-parse --verify --quiet "$c" >/dev/null && base=$c && break
+  done
+fi
+[ -n "$base" ] && git diff --name-only "$base"...HEAD
+```
+
+A family with a member in that list is duplicated knowledge somebody is changing today, which
+is exactly when a missed copy ships. Mark those families in the report and read them first.
+This changes the **order**, never the bucket: a 🔴 family nowhere near the branch is still 🔴,
+and dropping it because it is not in the diff turns a repository metric into a diff metric.
+Both empties need saying out loud. **An empty `$base`** means no branch to compare against —
+no `origin`, or a remote named something else — and a silent empty list reads as "nothing is
+being edited", which is the opposite of what it means. **An empty diff against a good base**
+usually means the work is still in the working tree, so add `git diff --name-only HEAD` and
+`git status --porcelain` to catch this morning's edits. The three-dot diff only sees committed
+work, and on `main` it sees nothing at all.
+
 Header: the timestamp from `date '+%Y-%m-%d-%H%M%S'`, the commit, a dirty-tree note, and the
 pack version from `run.engine`. Write to `<module>/.reports/dry-report-<timestamp>.md`.
 `<module>` is the nearest directory at or above the scope holding the project's manifest

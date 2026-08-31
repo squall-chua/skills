@@ -39,13 +39,60 @@ Mutate the code that holds decisions — business rules, calculations, guards, s
 Leave out test files, generated code, vendored dependencies, migrations, and plain
 configuration.
 
-Reckon on tens of mutants per source file, and put that count into the step 1 estimate. If
-it points at a run nobody will sit through, narrow the scope: the files changed against the
-main branch, or one module. A finished run on a small scope beats an abandoned run on the
-whole repo.
+Reckon on tens of mutants per source file, and put that count into the step 1 estimate.
 
-**Done when:** you have an explicit include and exclude list, and a rough estimate of how
-long the run will take.
+**Where the user named no paths, mutate the files changed against the default branch.** This
+is the one dimension whose cost scales with the scope you hand it — tens of mutants per file,
+each one a full suite run — so a whole-repo default is what turns this skill into an afternoon
+nobody spends. Discover the branch, because a repo may use `master` or `develop` and
+`origin/HEAD` is often absent:
+
+```sh
+base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)
+if [ -z "$base" ]; then
+  for c in origin/main origin/master origin/develop main master; do
+    git rev-parse --verify --quiet "$c" >/dev/null && base=$c && break
+  done
+fi
+[ -n "$base" ] && git diff --name-only "$base"...HEAD
+```
+
+The three-dot form already diffs from the merge base, so a separate `git merge-base` call is
+dead work. Two empties mean different things and neither is "nothing changed":
+
+- **An empty `$base`** is no branch to compare against — no `origin`, or a remote named
+  something else. Say so and ask for the scope, because a silent empty list reads as "nothing
+  to mutate".
+- **An empty diff against a good base** is almost never a branch with no work. It is somebody
+  typing this skill's name on `main` after an afternoon's editing, so look in the working tree
+  before you conclude anything: `git diff --name-only HEAD` for tracked edits and
+  `git status --porcelain` for untracked files. Still empty after both, ask for a module.
+
+**Then intersect the list with the include and exclude rules above**, and drop deleted paths
+with `--diff-filter=d`. A branch that renames a file puts a path the runner cannot open into
+the scope, and a branch that is mostly new tests hands the mutator its own test files.
+
+Say in the report that the scope was your choice and what it left out. A score on the diff is
+a statement about this branch's code, never about the suite as a whole, and step 6 has to read
+that way.
+
+**Most runners take a scope natively, and they do not all take the same thing:**
+
+| Runner | Flag | Takes |
+| --- | --- | --- |
+| `mutmut` | `--paths-to-mutate` | source paths — pass the list |
+| Stryker | `--mutate` | source globs — pass the list |
+| `pitest` | `--targetClasses` | fully-qualified class globs, so changed `.java` paths need mapping to class names first |
+| `cargo-mutants` | `--in-diff <file>` | a diff **file**, and it restricts to changed *lines* — write one first with `git diff "$base"...HEAD > changed.diff` |
+
+The last two are the ones that fail if you hand them a path list.
+
+A finished run on a small scope beats an abandoned run on the whole repo. Where the user did
+name paths, those are the scope exactly as given, however long it takes.
+
+**Done when:** you have an explicit include and exclude list, a rough estimate of how long the
+run will take, and — where the scope came from the diff rather than the user — that fact
+written down with what it left out.
 
 ## 3. Pick and configure the runner
 
@@ -259,7 +306,7 @@ report lists them all.
 | **Tool** | `stryker 8.2.0` |
 | **Command** | `<the command you ran>` |
 | **Commit** | `<short sha>` (dirty working tree) |
-| **Scope** | `src/domain/**` — 12 files |
+| **Scope** | `src/domain/**` — 12 files, changed against `origin/main` |
 | **Suite** | 412 passed, 0 failed, 3 skipped · 42s |
 | **Duration** | 14m 22s |
 | **Before** | [`mutation-report-2026-07-30-091412.md`](./mutation-report-2026-07-30-091412.md) |
